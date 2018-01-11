@@ -57,15 +57,16 @@ class GV_Entry_Revisions {
 	 */
 	private function add_hooks() {
 
+	    // Save entry revision on the front end and back end
+		add_action( 'gform_after_update_entry', array( $this, 'save' ), 10, 3 );
+
 		// We only run on the entry detail page
 		if( 'entry_detail' !== GFForms::get_page() ) {
 			return;
 		}
 
-		add_action( 'gform_after_update_entry', array( $this, 'save' ), 10, 3 );
-
 		add_filter( 'gform_entry_detail_meta_boxes', array( $this, 'add_meta_box' ) );
-		
+
 		add_action( 'admin_init', array( $this, 'restore' ) );
 
 		// If showing a revision, get rid of all metaboxes and lingering HTML stuff
@@ -187,8 +188,8 @@ class GV_Entry_Revisions {
 	/**
 	 * Get all revisions connected to an entry
 	 *
-	 * @since 1.0 
-	 * 
+	 * @since 1.0
+	 *
 	 * @param int $entry_id
 	 *
 	 * @return array Empty array if none found. Array if found
@@ -206,7 +207,7 @@ class GV_Entry_Revisions {
 		}
 
 		krsort( $return );
-		
+
 		return $return;
 	}
 
@@ -218,7 +219,7 @@ class GV_Entry_Revisions {
 	 * @return array Empty array, if no revisions exist. Otherwise, last revision.
 	 */
 	public function get_last_revision( $entry_id ) {
-		
+
 		$revisions = $this->get_revisions( $entry_id );
 
 		if ( empty( $revisions ) ) {
@@ -226,7 +227,7 @@ class GV_Entry_Revisions {
 		}
 
 		$revision = array_pop( $revisions );
-		
+
 		return $revision;
 	}
 
@@ -408,7 +409,7 @@ class GV_Entry_Revisions {
 	 * @param array $meta_boxes The properties for the meta boxes.
 	 * @param array $entry The entry currently being viewed/edited.
 	 * @param array $form The form object used to process the current entry.
-	 * 
+	 *
 	 * @return array $meta_boxes, with the Versions box added
 	 */
 	public function add_meta_box( $meta_boxes = array(), $entry = array(), $form = array() ) {
