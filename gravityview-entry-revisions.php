@@ -159,6 +159,11 @@ class GV_Entry_Revisions {
 
 		gform_update_meta( $entry_or_entry_id, self::$meta_key, maybe_serialize( $revisions ) );
 
+		// Add note
+		$user_data = get_userdata( get_current_user_id() );
+		$note = 'Fields changed. Check entry revisions for details.';
+		RGFormsModel::add_note( $entry_or_entry_id, get_current_user_id(), $user_data->display_name, $note );
+
 		return true;
 	}
 
