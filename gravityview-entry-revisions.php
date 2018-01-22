@@ -109,7 +109,7 @@ class GV_Entry_Revisions {
 	 * @return void
 	 */
 	public function save( $form = array(), $entry_id = 0, $original_entry = array() ) {
-		$this->add_revision( $entry_id, $original_entry );
+		$this->add_revision( $form, $entry_id, $original_entry );
 	}
 
 	/**
@@ -117,12 +117,13 @@ class GV_Entry_Revisions {
 	 *
 	 * @since 1.0
 	 *
+     * @param array $form The form object for the entry.
 	 * @param int|array $entry_or_entry_id Current entry ID or current entry array
 	 * @param array $revision_to_add Previous entry data to add as a revision
 	 *
 	 * @return bool false: Nothing changed; true: updated
 	 */
-	private function add_revision( $entry_or_entry_id = 0, $revision_to_add = array() ) {
+	private function add_revision( $form, $entry_or_entry_id = 0, $revision_to_add = array() ) {
 
 		if( ! is_array( $entry_or_entry_id ) && is_numeric( $entry_or_entry_id ) ) {
 			$current_entry = GFAPI::get_entry( $entry_or_entry_id );
@@ -159,9 +160,13 @@ class GV_Entry_Revisions {
 
 		gform_update_meta( $entry_or_entry_id, self::$meta_key, maybe_serialize( $revisions ) );
 
-		// Add note
+		// Add note so we can display the record on the front end
 		$user_data = get_userdata( get_current_user_id() );
-		$note = 'Fields changed. Check entry revisions for details.';
+		$note = '';
+		foreach ( $changed_fields as $key => $old_value ) {
+		    $field = RGFormsModel::get_field( $form, $key );
+		    $note .= "Field " . $field->label . " changed from $old_value to " . $current_entry[$key] . "\n\r";
+        }
 		RGFormsModel::add_note( $entry_or_entry_id, get_current_user_id(), $user_data->display_name, $note );
 
 		return true;
