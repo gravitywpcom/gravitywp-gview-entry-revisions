@@ -165,7 +165,7 @@ class GV_Entry_Revisions {
 		$note = '';
 		foreach ( $changed_fields as $key => $old_value ) {
 		    $field = RGFormsModel::get_field( $form, $key );
-		    $note .= "__( 'Field', 'gv-entry-revisions' ) " . $field->label . " __( 'changed from', 'gv-entry-revisions' ) $old_value __( 'to', 'gv-entry-revisions' ) " . $current_entry[$key] . "\n\r";
+		    $note .= __( 'Field', 'gravityview-entry-revisions' ) . " " . $field->label . " " . __( 'changed from', 'gravityview-entry-revisions' ) . " " . $old_value . " " . __( 'to', 'gravityview-entry-revisions' ) . " " . $current_entry[$key] . "\n\r";
         }
 		RGFormsModel::add_note( $entry_or_entry_id, get_current_user_id(), $user_data->display_name, $note );
 
@@ -320,7 +320,7 @@ class GV_Entry_Revisions {
 
 		// Revision has already been deleted or does not exist
 		if( empty( $revision ) ) {
-			return new WP_Error( 'not_found', __( 'Revision not found', 'gv-entry-revisions' ), array( 'entry_id' => $entry_id, 'revision_id' => $revision_id ) );
+			return new WP_Error( 'not_found', __( 'Revision not found', 'gravityview-entry-revisions' ), array( 'entry_id' => $entry_id, 'revision_id' => $revision_id ) );
 		}
 
 		$current_entry = GFAPI::get_entry( $entry_id );
@@ -479,9 +479,9 @@ class GV_Entry_Revisions {
 
 			$diff = wp_text_diff( $previous_value, $current_value, array(
 				'show_split_view' => 1,
-				'title' => sprintf( esc_html__( '%s (Field %s)', 'gv-entry-revisions' ), $label, $key ),
-				'title_left' => esc_html__( 'Entry Revision', 'gv-entry-revisions' ),
-				'title_right' => esc_html__( 'Current Entry', 'gv-entry-revisions' ),
+				'title' => sprintf( esc_html__( '%s (Field %s)', 'gravityview-entry-revisions' ), $label, $key ),
+				'title_left' => esc_html__( 'Entry Revision', 'gravityview-entry-revisions' ),
+				'title_right' => esc_html__( 'Current Entry', 'gravityview-entry-revisions' ),
 			) );
 
 			/**
@@ -523,7 +523,7 @@ class GV_Entry_Revisions {
 		$diffs = $this->get_diff( $revision, $entry, $form );
 
 		if ( empty( $diffs ) ) {
-			echo '<h3>' . esc_html__( 'This revision is identical to the current entry.', 'gv-entry-revisions' ) . '</h3>';
+			echo '<h3>' . esc_html__( 'This revision is identical to the current entry.', 'gravityview-entry-revisions' ) . '</h3>';
 			?><a href="<?php echo esc_url( remove_query_arg( 'revision' ) ); ?>" class="button button-primary button-large"><?php esc_html_e( 'Return to Entry' ); ?></a><?php
 			return;
 		}
@@ -666,7 +666,7 @@ class GV_Entry_Revisions {
 		$revisions = $this->get_revisions( $entry_id );
 
 		if( empty( $revisions ) ) {
-			echo wpautop( esc_html__( 'This entry has no revisions.', 'gv-entry-revisions' ) );
+			echo wpautop( esc_html__( 'This entry has no revisions.', 'gravityview-entry-revisions' ) );
 			return;
 		}
 
@@ -680,7 +680,7 @@ class GV_Entry_Revisions {
 			}
 		}
 
-		echo "<div class='hide-if-js'><p>" . __( 'JavaScript must be enabled to use this feature.', 'gv-entry-revisions' ) . "</p></div>\n";
+		echo "<div class='hide-if-js'><p>" . __( 'JavaScript must be enabled to use this feature.', 'gravityview-entry-revisions' ) . "</p></div>\n";
 
 		echo "<ul class='post-revisions hide-if-no-js'>\n";
 		echo $rows;
@@ -689,3 +689,9 @@ class GV_Entry_Revisions {
 }
 
 add_action( 'gform_loaded', array( 'GV_Entry_Revisions', 'load' ) );
+
+// Translation files of the plugin
+add_action('plugins_loaded', 'gv_entry_revisions_load_textdomain');
+	function gv_entry_revisions_load_textdomain() {
+		load_plugin_textdomain( 'gravityview-entry-revisions', false, dirname( plugin_basename(__FILE__) ) . '/languages' );
+}
