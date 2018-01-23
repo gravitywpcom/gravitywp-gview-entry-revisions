@@ -165,7 +165,7 @@ class GV_Entry_Revisions {
 		$note = '';
 		foreach ( $changed_fields as $key => $old_value ) {
 		    $field = RGFormsModel::get_field( $form, $key );
-		    $note .= "Field " . $field->label . " changed from $old_value to " . $current_entry[$key] . "\n\r";
+		    $note .= "__( 'Field', 'gv-entry-revisions' ) " . $field->label . " __( 'changed from', 'gv-entry-revisions' ) $old_value __( 'to', 'gv-entry-revisions' ) " . $current_entry[$key] . "\n\r";
         }
 		RGFormsModel::add_note( $entry_or_entry_id, get_current_user_id(), $user_data->display_name, $note );
 
