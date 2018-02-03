@@ -260,7 +260,7 @@ class GV_Entry_Revisions {
 	 * @param int $entry_id
 	 * @param int $revision_id Revision GMT timestamp
 	 *
-	 * return void|false False if revision isn't found; true if gform_update_meta called.
+	 * @return void|false False if revision isn't found; true if gform_update_meta called.
 	 */
 	private function delete_revision( $entry_id = 0, $revision_id = 0 ) {
 
@@ -290,7 +290,7 @@ class GV_Entry_Revisions {
 	 * @param int $entry_id
 	 * @param int $revision_id GMT timestamp of revision
 	 *
-	 * return array|false Array if found, false if not.
+	 * @return array|false Array if found, false if not.
 	 */
 	private function get_revision( $entry_id = 0, $revision_id = 0 ) {
 
