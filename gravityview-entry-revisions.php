@@ -165,7 +165,34 @@ class GV_Entry_Revisions {
 		$note = '';
 		foreach ( $changed_fields as $key => $old_value ) {
 		    $field = RGFormsModel::get_field( $form, $key );
-		    $note .= __( 'Field', 'gravityview-entry-revisions' ) . " " . $field->label . " " . __( 'changed from', 'gravityview-entry-revisions' ) . " " . $old_value . " " . __( 'to', 'gravityview-entry-revisions' ) . " " . $current_entry[$key] . "\n\r";
+
+		    if ( 'list' == $field->type ) {
+		        if ( ! empty( $old_value ) ) {
+		            $old_value_arr = unserialize( $old_value );
+			        $old_value = "\r\n";
+
+		            foreach ( $old_value_arr as $_key => $row ) {
+		                $old_value .= 'Row ' . ( $_key + 1 ) . ': ';
+			            $row = array_values( $row );
+		                $old_value .= implode( ', ', $row ) . "\r\n";
+                    }
+                }
+
+			    if ( ! empty( $current_entry[$key] ) ) {
+				    $new_value_arr = unserialize( $current_entry[$key] );
+				    $new_value = "\r\n";
+
+				    foreach ( $new_value_arr as $_key => $row ) {
+					    $new_value .= 'Row ' . ( $_key + 1 ) . ': ';
+					    $row = array_values( $row );
+					    $new_value .= implode( ', ', $row ) . "\r\n";
+				    }
+
+				    $current_entry[$key] = $new_value;
+			    }
+            }
+
+		    $note .= __( 'Field', 'gravityview-entry-revisions' ) . " " . $field->label . " " . __( 'changed from', 'gravityview-entry-revisions' ) . " " . $old_value . " " . __( 'to', 'gravityview-entry-revisions' ) . " " . $current_entry[$key] . "\r\n";
         }
 		RGFormsModel::add_note( $entry_or_entry_id, get_current_user_id(), $user_data->display_name, $note );
 
