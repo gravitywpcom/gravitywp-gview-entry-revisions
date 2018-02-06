@@ -171,10 +171,12 @@ class GV_Entry_Revisions {
 		            $old_value_arr = unserialize( $old_value );
 			        $old_value = "\r\n";
 
-		            foreach ( $old_value_arr as $_key => $row ) {
-		                $old_value .= 'Row ' . ( $_key + 1 ) . ': ';
-			            $row = array_values( $row );
-		                $old_value .= implode( ', ', $row ) . "\r\n";
+		            if ( is_array( $old_value_arr ) ) {
+			            foreach ( $old_value_arr as $_key => $row ) {
+				            $old_value .= 'Row ' . ( $_key + 1 ) . ': ';
+				            $row = array_values( $row );
+				            $old_value .= implode( ', ', $row ) . "\r\n";
+			            }
                     }
                 }
 
@@ -182,11 +184,13 @@ class GV_Entry_Revisions {
 				    $new_value_arr = unserialize( $current_entry[$key] );
 				    $new_value = "\r\n";
 
-				    foreach ( $new_value_arr as $_key => $row ) {
-					    $new_value .= 'Row ' . ( $_key + 1 ) . ': ';
-					    $row = array_values( $row );
-					    $new_value .= implode( ', ', $row ) . "\r\n";
-				    }
+				    if ( is_array( $new_value_arr ) ) {
+					    foreach ( $new_value_arr as $_key => $row ) {
+						    $new_value .= 'Row ' . ( $_key + 1 ) . ': ';
+						    $row = array_values( $row );
+						    $new_value .= implode( ', ', $row ) . "\r\n";
+					    }
+                    }
 
 				    $current_entry[$key] = $new_value;
 			    }
