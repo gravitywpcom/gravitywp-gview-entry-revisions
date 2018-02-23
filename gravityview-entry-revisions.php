@@ -194,6 +194,38 @@ class GV_Entry_Revisions {
 
 				    $current_entry[$key] = $new_value;
 			    }
+            } elseif ( 'multiselect' == $field->type ) {
+		        $choices = (array) $field->choices;
+		        $choice_labels = wp_list_pluck( $choices, 'text' );
+		        $choice_values = wp_list_pluck( $choices, 'value' );
+
+			    if ( ! empty( $old_value ) ) {
+                    $old_value_arr = json_decode( $old_value );
+				    $_old_value_arr = array();
+
+                    foreach ( $old_value_arr as $arr_value ) {
+	                    $_key = array_search( $arr_value, $choice_values );
+                        if ( false !== $_key ) {
+	                        $_old_value_arr[] = $choice_labels[$_key];
+                        }
+                    }
+
+                    $old_value = json_encode( $_old_value_arr );
+			    }
+
+			    if ( ! empty( $current_entry[$key] ) ) {
+				    $new_value_arr = json_decode( $current_entry[$key] );
+				    $_new_value_arr = array();
+
+				    foreach ( $new_value_arr as $arr_value ) {
+					    $_key = array_search( $arr_value, $choice_values );
+					    if ( false !== $_key ) {
+						    $_new_value_arr[] = $choice_labels[$_key];
+					    }
+				    }
+
+				    $current_entry[$key] = json_encode( $_new_value_arr );
+			    }
             }
 
 		    $note .= __( 'Field', 'gravityview-entry-revisions' ) . " " . $field->label . " " . __( 'changed from', 'gravityview-entry-revisions' ) . " " . $old_value . " " . __( 'to', 'gravityview-entry-revisions' ) . " " . $current_entry[$key] . "\r\n";
