@@ -3,7 +3,7 @@
  * Plugin Name:       	GravityView - Gravity Forms Entry Revisions
  * Plugin URI:        	https://gravityview.co/extensions/entry-revisions/
  * Description:       	Track changes to Gravity Forms entries and restore from previous revisions. Requires Gravity Forms 2.0 or higher.
- * Version:          	1.0
+ * Version:          	1.1
  * Author:            	GravityView
  * Author URI:        	https://gravityview.co
  * Text Domain:       	gv-entry-revisions
@@ -211,7 +211,7 @@ class GV_Entry_Revisions {
                     }
 
                     $old_value = json_encode( $_old_value_arr );
-			    }
+			    } 
 
 			    if ( ! empty( $current_entry[$key] ) ) {
 				    $new_value_arr = json_decode( $current_entry[$key] );
@@ -228,7 +228,7 @@ class GV_Entry_Revisions {
 			    }
             }
 
-		    $note .= __( 'Field', 'gravityview-entry-revisions' ) . " " . $field->label . " " . __( 'changed from', 'gravityview-entry-revisions' ) . " " . $old_value . " " . __( 'to', 'gravityview-entry-revisions' ) . " " . $current_entry[$key] . "\r\n";
+		    $note .= __( 'Field', 'gravityview-entry-revisions' ) . " " . $field->label . "\n" . __( 'changed from', 'gravityview-entry-revisions' ) . ": " . $old_value  . "\n" . __( 'to', 'gravityview-entry-revisions' ) . ": " . $current_entry[$key] . "\r\n" . "\n";
         }
 		RGFormsModel::add_note( $entry_or_entry_id, get_current_user_id(), $user_data->display_name, $note );
 
