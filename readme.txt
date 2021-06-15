@@ -17,6 +17,13 @@ Track changes to Gravity Forms entries and restore from previous revisions. Requ
 
 == Changelog ==
 
+= 1.1.1 =
+- Do not dispay full file paths in the added note, only the basename.
+
+
+= 1.1 =
+- several customizations
+
 = 1.0 =
 
 * Launch!

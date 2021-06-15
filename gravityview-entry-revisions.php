@@ -3,7 +3,7 @@
  * Plugin Name:       	GravityView - Gravity Forms Entry Revisions
  * Plugin URI:        	https://gravityview.co/extensions/entry-revisions/
  * Description:       	Track changes to Gravity Forms entries and restore from previous revisions. Requires Gravity Forms 2.0 or higher.
- * Version:          	1.0
+ * Version:          	1.1.1
  * Author:            	GravityView
  * Author URI:        	https://gravityview.co
  * Text Domain:       	gv-entry-revisions
@@ -57,15 +57,16 @@ class GV_Entry_Revisions {
 	 */
 	private function add_hooks() {
 
+	    // Save entry revision on the front end and back end
+		add_action( 'gform_after_update_entry', array( $this, 'save' ), 10, 3 );
+
 		// We only run on the entry detail page
 		if( 'entry_detail' !== GFForms::get_page() ) {
 			return;
 		}
 
-		add_action( 'gform_after_update_entry', array( $this, 'save' ), 10, 3 );
-
 		add_filter( 'gform_entry_detail_meta_boxes', array( $this, 'add_meta_box' ) );
-		
+
 		add_action( 'admin_init', array( $this, 'restore' ) );
 
 		// If showing a revision, get rid of all metaboxes and lingering HTML stuff
@@ -108,7 +109,7 @@ class GV_Entry_Revisions {
 	 * @return void
 	 */
 	public function save( $form = array(), $entry_id = 0, $original_entry = array() ) {
-		$this->add_revision( $entry_id, $original_entry );
+		$this->add_revision( $form, $entry_id, $original_entry );
 	}
 
 	/**
@@ -116,12 +117,13 @@ class GV_Entry_Revisions {
 	 *
 	 * @since 1.0
 	 *
+     * @param array $form The form object for the entry.
 	 * @param int|array $entry_or_entry_id Current entry ID or current entry array
 	 * @param array $revision_to_add Previous entry data to add as a revision
 	 *
 	 * @return bool false: Nothing changed; true: updated
 	 */
-	private function add_revision( $entry_or_entry_id = 0, $revision_to_add = array() ) {
+	private function add_revision( $form, $entry_or_entry_id = 0, $revision_to_add = array() ) {
 
 		if( ! is_array( $entry_or_entry_id ) && is_numeric( $entry_or_entry_id ) ) {
 			$current_entry = GFAPI::get_entry( $entry_or_entry_id );
@@ -158,6 +160,114 @@ class GV_Entry_Revisions {
 
 		gform_update_meta( $entry_or_entry_id, self::$meta_key, maybe_serialize( $revisions ) );
 
+		// Add note so we can display the record on the front end
+		$user_data = get_userdata( get_current_user_id() );
+		$note = '';
+		foreach ( $changed_fields as $key => $old_value ) {
+		    $field = RGFormsModel::get_field( $form, $key );
+
+		    if ( 'list' == $field->type ) {
+		        if ( ! empty( $old_value ) ) {
+		            $old_value_arr = unserialize( $old_value );
+			        $old_value = "\r\n";
+
+		            if ( is_array( $old_value_arr ) ) {
+			            foreach ( $old_value_arr as $_key => $row ) {
+				            $old_value .= 'Row ' . ( $_key + 1 ) . ': ';
+				            $row = array_values( $row );
+				            $old_value .= implode( ', ', $row ) . "\r\n";
+			            }
+                    }
+                }
+
+			    if ( ! empty( $current_entry[$key] ) ) {
+				    $new_value_arr = unserialize( $current_entry[$key] );
+				    $new_value = "\r\n";
+
+				    if ( is_array( $new_value_arr ) ) {
+					    foreach ( $new_value_arr as $_key => $row ) {
+						    $new_value .= 'Row ' . ( $_key + 1 ) . ': ';
+						    $row = array_values( $row );
+						    $new_value .= implode( ', ', $row ) . "\r\n";
+					    }
+                    }
+
+				    $current_entry[$key] = $new_value;
+			    }
+            } elseif ( 'multiselect' == $field->type ) {
+		        $choices = (array) $field->choices;
+		        $choice_labels = wp_list_pluck( $choices, 'text' );
+		        $choice_values = wp_list_pluck( $choices, 'value' );
+
+			    if ( ! empty( $old_value ) ) {
+                    $old_value_arr = json_decode( $old_value );
+				    $_old_value_arr = array();
+
+                    foreach ( $old_value_arr as $arr_value ) {
+	                    $_key = array_search( $arr_value, $choice_values );
+                        if ( false !== $_key ) {
+	                        $_old_value_arr[] = $choice_labels[$_key];
+                        }
+                    }
+
+                    $old_value = json_encode( $_old_value_arr );
+			    } 
+
+			    if ( ! empty( $current_entry[$key] ) ) {
+				    $new_value_arr = json_decode( $current_entry[$key] );
+				    $_new_value_arr = array();
+
+				    foreach ( $new_value_arr as $arr_value ) {
+					    $_key = array_search( $arr_value, $choice_values );
+					    if ( false !== $_key ) {
+						    $_new_value_arr[] = $choice_labels[$_key];
+					    }
+				    }
+
+				    $current_entry[$key] = json_encode( $_new_value_arr );
+			    }
+            } elseif ( 'fileupload' == $field->type ) {
+
+				if ( ! empty( $old_value ) ) {
+					if ( $field->multipleFiles ) {
+						$urls = json_decode( $old_value );
+						foreach ( $urls as &$url ) {
+							$url = wp_basename( $url );
+						}
+						$old_value = json_encode( $urls );
+					} else {
+						$old_value = wp_basename( $old_value );
+					}
+			    } 
+
+			    if ( ! empty( $current_entry[$key] ) ) {
+					if ( $field->multipleFiles ) {
+						$urls = json_decode( $current_entry[$key] );
+						foreach ( $urls as &$url ) {
+							$url = wp_basename( $url );
+						}
+						$current_entry[$key] = json_encode( $urls );
+					} else {
+						$current_entry[$key] = wp_basename( $current_entry[$key] );
+					}
+			    }
+
+
+
+			}
+			
+			if (empty ($old_value)) {
+			$old_value = "[ " . __( 'empty', 'gravityview-entry-revisions' ) . " ]";
+			}
+			
+			if (empty ($current_entry[$key])) {
+			$current_entry[$key] = "[ " . __( 'empty', 'gravityview-entry-revisions' ) . " ]";
+			}
+	
+		    $note .= __( 'Field', 'gravityview-entry-revisions' ) . " " . $field->label . "\n" . __( 'changed from', 'gravityview-entry-revisions' ) . ": " . $old_value  . "\n" . __( 'to', 'gravityview-entry-revisions' ) . ": " . $current_entry[$key] . "\r\n" . "\n";
+        }
+		RGFormsModel::add_note( $entry_or_entry_id, get_current_user_id(), $user_data->display_name, $note );
+
 		return true;
 	}
 
@@ -187,8 +297,8 @@ class GV_Entry_Revisions {
 	/**
 	 * Get all revisions connected to an entry
 	 *
-	 * @since 1.0 
-	 * 
+	 * @since 1.0
+	 *
 	 * @param int $entry_id
 	 *
 	 * @return array Empty array if none found. Array if found
@@ -206,7 +316,7 @@ class GV_Entry_Revisions {
 		}
 
 		krsort( $return );
-		
+
 		return $return;
 	}
 
@@ -218,7 +328,7 @@ class GV_Entry_Revisions {
 	 * @return array Empty array, if no revisions exist. Otherwise, last revision.
 	 */
 	public function get_last_revision( $entry_id ) {
-		
+
 		$revisions = $this->get_revisions( $entry_id );
 
 		if ( empty( $revisions ) ) {
@@ -226,7 +336,7 @@ class GV_Entry_Revisions {
 		}
 
 		$revision = array_pop( $revisions );
-		
+
 		return $revision;
 	}
 
@@ -249,7 +359,7 @@ class GV_Entry_Revisions {
 	 * @param int $entry_id
 	 * @param int $revision_id Revision GMT timestamp
 	 *
-	 * return void|false False if revision isn't found; true if gform_update_meta called.
+	 * @return void|false False if revision isn't found; true if gform_update_meta called.
 	 */
 	private function delete_revision( $entry_id = 0, $revision_id = 0 ) {
 
@@ -279,7 +389,7 @@ class GV_Entry_Revisions {
 	 * @param int $entry_id
 	 * @param int $revision_id GMT timestamp of revision
 	 *
-	 * return array|false Array if found, false if not.
+	 * @return array|false Array if found, false if not.
 	 */
 	private function get_revision( $entry_id = 0, $revision_id = 0 ) {
 
@@ -309,7 +419,7 @@ class GV_Entry_Revisions {
 
 		// Revision has already been deleted or does not exist
 		if( empty( $revision ) ) {
-			return new WP_Error( 'not_found', __( 'Revision not found', 'gv-entry-revisions' ), array( 'entry_id' => $entry_id, 'revision_id' => $revision_id ) );
+			return new WP_Error( 'not_found', __( 'Revision not found', 'gravityview-entry-revisions' ), array( 'entry_id' => $entry_id, 'revision_id' => $revision_id ) );
 		}
 
 		$current_entry = GFAPI::get_entry( $entry_id );
@@ -408,7 +518,7 @@ class GV_Entry_Revisions {
 	 * @param array $meta_boxes The properties for the meta boxes.
 	 * @param array $entry The entry currently being viewed/edited.
 	 * @param array $form The form object used to process the current entry.
-	 * 
+	 *
 	 * @return array $meta_boxes, with the Versions box added
 	 */
 	public function add_meta_box( $meta_boxes = array(), $entry = array(), $form = array() ) {
@@ -468,9 +578,9 @@ class GV_Entry_Revisions {
 
 			$diff = wp_text_diff( $previous_value, $current_value, array(
 				'show_split_view' => 1,
-				'title' => sprintf( esc_html__( '%s (Field %s)', 'gv-entry-revisions' ), $label, $key ),
-				'title_left' => esc_html__( 'Entry Revision', 'gv-entry-revisions' ),
-				'title_right' => esc_html__( 'Current Entry', 'gv-entry-revisions' ),
+				'title' => sprintf( esc_html__( '%s (Field %s)', 'gravityview-entry-revisions' ), $label, $key ),
+				'title_left' => esc_html__( 'Entry Revision', 'gravityview-entry-revisions' ),
+				'title_right' => esc_html__( 'Current Entry', 'gravityview-entry-revisions' ),
 			) );
 
 			/**
@@ -512,7 +622,7 @@ class GV_Entry_Revisions {
 		$diffs = $this->get_diff( $revision, $entry, $form );
 
 		if ( empty( $diffs ) ) {
-			echo '<h3>' . esc_html__( 'This revision is identical to the current entry.', 'gv-entry-revisions' ) . '</h3>';
+			echo '<h3>' . esc_html__( 'This revision is identical to the current entry.', 'gravityview-entry-revisions' ) . '</h3>';
 			?><a href="<?php echo esc_url( remove_query_arg( 'revision' ) ); ?>" class="button button-primary button-large"><?php esc_html_e( 'Return to Entry' ); ?></a><?php
 			return;
 		}
@@ -655,7 +765,7 @@ class GV_Entry_Revisions {
 		$revisions = $this->get_revisions( $entry_id );
 
 		if( empty( $revisions ) ) {
-			echo wpautop( esc_html__( 'This entry has no revisions.', 'gv-entry-revisions' ) );
+			echo wpautop( esc_html__( 'This entry has no revisions.', 'gravityview-entry-revisions' ) );
 			return;
 		}
 
@@ -669,7 +779,7 @@ class GV_Entry_Revisions {
 			}
 		}
 
-		echo "<div class='hide-if-js'><p>" . __( 'JavaScript must be enabled to use this feature.', 'gv-entry-revisions' ) . "</p></div>\n";
+		echo "<div class='hide-if-js'><p>" . __( 'JavaScript must be enabled to use this feature.', 'gravityview-entry-revisions' ) . "</p></div>\n";
 
 		echo "<ul class='post-revisions hide-if-no-js'>\n";
 		echo $rows;
@@ -678,3 +788,9 @@ class GV_Entry_Revisions {
 }
 
 add_action( 'gform_loaded', array( 'GV_Entry_Revisions', 'load' ) );
+
+// Translation files of the plugin
+add_action('plugins_loaded', 'gv_entry_revisions_load_textdomain');
+	function gv_entry_revisions_load_textdomain() {
+		load_plugin_textdomain( 'gravityview-entry-revisions', false, dirname( plugin_basename(__FILE__) ) . '/languages' );
+}
