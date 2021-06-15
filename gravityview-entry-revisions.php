@@ -3,7 +3,7 @@
  * Plugin Name:       	GravityView - Gravity Forms Entry Revisions
  * Plugin URI:        	https://gravityview.co/extensions/entry-revisions/
  * Description:       	Track changes to Gravity Forms entries and restore from previous revisions. Requires Gravity Forms 2.0 or higher.
- * Version:          	1.0
+ * Version:          	1.1.1
  * Author:            	GravityView
  * Author URI:        	https://gravityview.co
  * Text Domain:       	gv-entry-revisions
@@ -226,7 +226,35 @@ class GV_Entry_Revisions {
 
 				    $current_entry[$key] = json_encode( $_new_value_arr );
 			    }
-            }
+            } elseif ( 'fileupload' == $field->type ) {
+
+				if ( ! empty( $old_value ) ) {
+					if ( $field->multipleFiles ) {
+						$urls = json_decode( $old_value );
+						foreach ( $urls as &$url ) {
+							$url = wp_basename( $url );
+						}
+						$old_value = json_encode( $urls );
+					} else {
+						$old_value = wp_basename( $old_value );
+					}
+			    } 
+
+			    if ( ! empty( $current_entry[$key] ) ) {
+					if ( $field->multipleFiles ) {
+						$urls = json_decode( $current_entry[$key] );
+						foreach ( $urls as &$url ) {
+							$url = wp_basename( $url );
+						}
+						$current_entry[$key] = json_encode( $urls );
+					} else {
+						$current_entry[$key] = wp_basename( $current_entry[$key] );
+					}
+			    }
+
+
+
+			}
 			
 			if (empty ($old_value)) {
 			$old_value = "[ " . __( 'empty', 'gravityview-entry-revisions' ) . " ]";
