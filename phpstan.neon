@@ -1,0 +1,15 @@
+parameters:
+	level: 6
+	phpVersion: 80229
+	paths:
+		- /
+	scanDirectories:
+		- ../gravityforms
+		- ../gravityview
+	excludePaths:
+	 - node_modules/*
+	 - lib/*
+	 - tests/*
+	 - vendor/*
+	 - .github/*
+	 - .git/*

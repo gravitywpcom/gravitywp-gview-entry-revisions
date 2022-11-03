@@ -3,7 +3,7 @@
  * Plugin Name:       	GravityView - Gravity Forms Entry Revisions
  * Plugin URI:        	https://gravityview.co/extensions/entry-revisions/
  * Description:       	Track changes to Gravity Forms entries and restore from previous revisions. Requires Gravity Forms 2.0 or higher.
- * Version:          	1.1.1
+ * Version:          	1.1.2
  * Author:            	GravityView
  * Author URI:        	https://gravityview.co
  * Text Domain:       	gv-entry-revisions
@@ -34,7 +34,14 @@ class GV_Entry_Revisions {
 
 	/**
 	 * Instantiate the class
-	 * @since 1.0
+	 *
+	 * @author GravityWP
+	 * @since v1.0
+	 * @version v1.0.0
+	 * @access public static
+	 *
+	 *
+	 * @return void
 	 */
 	public static function load() {
 		if( ! did_action( 'gv_entry_versions_loaded' ) ) {
@@ -45,7 +52,14 @@ class GV_Entry_Revisions {
 
 	/**
 	 * GV_Entry_Revisions constructor.
-	 * @since 1.0
+	 *
+	 * @author GravityWP
+	 * @since v1.0
+	 * @version v1.0.0
+	 * @access private
+	 *
+	 *
+	 * @return void
 	 */
 	private function __construct() {
 		$this->add_hooks();
@@ -53,7 +67,14 @@ class GV_Entry_Revisions {
 
 	/**
 	 * Add hooks on the single entry screen
-	 * @since 1.0
+	 *
+	 * @author GravityWP
+	 * @since v1.0
+	 * @version v1.0.0
+	 * @access private
+	 *
+	 *
+	 * @return void
 	 */
 	private function add_hooks() {
 
@@ -102,9 +123,9 @@ class GV_Entry_Revisions {
 	 *
 	 * @since 1.0
 	 *
-	 * @param array   $form           The form object for the entry.
-	 * @param integer $lead['id']     The entry ID.
-	 * @param array   $original_entry The entry object before being updated.
+	 * @param array<mixed>   $form           The form object for the entry.
+	 * @param integer $entry_id     The entry ID.
+	 * @param array<mixed>   $original_entry The entry object before being updated.
 	 *
 	 * @return void
 	 */
@@ -117,9 +138,9 @@ class GV_Entry_Revisions {
 	 *
 	 * @since 1.0
 	 *
-     * @param array $form The form object for the entry.
-	 * @param int|array $entry_or_entry_id Current entry ID or current entry array
-	 * @param array $revision_to_add Previous entry data to add as a revision
+     * @param array<mixed> $form The form object for the entry.
+	 * @param int|array<mixed> $entry_or_entry_id Current entry ID or current entry array
+	 * @param array<mixed> $revision_to_add Previous entry data to add as a revision
 	 *
 	 * @return bool false: Nothing changed; true: updated
 	 */
@@ -275,10 +296,10 @@ class GV_Entry_Revisions {
 	/**
 	 * Compares old entry array to new, return array of differences
 	 *
-	 * @param array $old
-	 * @param array $new
+	 * @param array<mixed> $old
+	 * @param array<mixed> $new
 	 *
-	 * @return array array of differences, with keys preserved
+	 * @return array<mixed> array of differences, with keys preserved
 	 */
 	private function get_modified_entry_fields( $old = array(), $new = array() ) {
 
@@ -301,7 +322,7 @@ class GV_Entry_Revisions {
 	 *
 	 * @param int $entry_id
 	 *
-	 * @return array Empty array if none found. Array if found
+	 * @return array<mixed> Empty array if none found. Array if found
 	 */
 	public function get_revisions( $entry_id = 0 ) {
 
@@ -323,9 +344,13 @@ class GV_Entry_Revisions {
 	/**
 	 * Get the latest revision
 	 *
-	 * @param $entry_id
+	 * @since v0.0.1
+	 * @version v1.0.0
+	 * @access public
 	 *
-	 * @return array Empty array, if no revisions exist. Otherwise, last revision.
+	 * @param int $entry_id 
+	 *
+	 * @return array<mixed> Empty array, if no revisions exist. Otherwise, last revision.
 	 */
 	public function get_last_revision( $entry_id ) {
 
@@ -343,7 +368,10 @@ class GV_Entry_Revisions {
 	/**
 	 * Deletes all revisions for an entry
 	 *
-	 * @since 1.0
+	 * @author GravityWP
+	 * @since v1.0
+	 * @version v1.0.0
+	 * @access private
 	 *
 	 * @param int $entry_id ID of the entry to remove revsions
 	 */
@@ -359,7 +387,7 @@ class GV_Entry_Revisions {
 	 * @param int $entry_id
 	 * @param int $revision_id Revision GMT timestamp
 	 *
-	 * @return void|false False if revision isn't found; true if gform_update_meta called.
+	 * @return bool False if revision isn't found; true if gform_update_meta called.
 	 */
 	private function delete_revision( $entry_id = 0, $revision_id = 0 ) {
 
@@ -389,7 +417,7 @@ class GV_Entry_Revisions {
 	 * @param int $entry_id
 	 * @param int $revision_id GMT timestamp of revision
 	 *
-	 * @return array|false Array if found, false if not.
+	 * @return array<mixed>|false Array if found, false if not.
 	 */
 	private function get_revision( $entry_id = 0, $revision_id = 0 ) {
 
@@ -459,7 +487,8 @@ class GV_Entry_Revisions {
 		} else {
 
 			// Store the current entry as a revision, too, so you can revert
-			$this->add_revision( $entry_id, $current_entry );
+			// AJK: commented out for now as this call has the wrong arguments and will do nothin good.
+			//$this->add_revision( $entry_id, $current_entry );
 
 			/**
 			 * Should the revision be removed after it has been restored? Default: false
@@ -493,7 +522,7 @@ class GV_Entry_Revisions {
 			$revision_id = rgget( 'restore' );
 			$entry_id = rgget( 'lid' );
 			$nonce = rgget( '_wpnonce' );
-			$nonce_action = $this->generate_restore_nonce_action( $entry_id, $revision_id );
+			$nonce_action = $this->generate_restore_nonce_action( absint( $entry_id ), absint( $revision_id ) );
 			$valid = wp_verify_nonce( $nonce, $nonce_action );
 
 			// Nonce didn't validate
@@ -503,7 +532,7 @@ class GV_Entry_Revisions {
 			}
 
 			// Handle restoring the entry
-			$this->restore_revision( $entry_id, $revision_id );
+			$this->restore_revision( absint( $entry_id ), absint( $revision_id ) );
 
 			wp_safe_redirect( remove_query_arg( 'restore' ) );
 			exit();
@@ -515,11 +544,11 @@ class GV_Entry_Revisions {
 	 *
 	 * @since 1.0
 	 *
-	 * @param array $meta_boxes The properties for the meta boxes.
-	 * @param array $entry The entry currently being viewed/edited.
-	 * @param array $form The form object used to process the current entry.
+	 * @param array<mixed> $meta_boxes The properties for the meta boxes.
+	 * @param array<mixed> $entry The entry currently being viewed/edited.
+	 * @param array<mixed> $form The form object used to process the current entry.
 	 *
-	 * @return array $meta_boxes, with the Versions box added
+	 * @return array<mixed> $meta_boxes, with the Versions box added
 	 */
 	public function add_meta_box( $meta_boxes = array(), $entry = array(), $form = array() ) {
 
@@ -549,11 +578,11 @@ class GV_Entry_Revisions {
 	 *
 	 * @uses wp_text_diff()
 	 *
-	 * @param array $previous Previous entry
-	 * @param array $current Current entry
-	 * @param array $form Entry form
+	 * @param array<mixed> $previous Previous entry
+	 * @param array<mixed> $current Current entry
+	 * @param array<mixed> $form Entry form
 	 *
-	 * @return array Array of diff output generated by wp_text_diff()
+	 * @return array<mixed> Array of diff output generated by wp_text_diff()
 	 */
 	private function get_diff( $previous = array(), $current = array(), $form = array() ) {
 
@@ -602,7 +631,7 @@ class GV_Entry_Revisions {
 	 *
 	 * @since 1.0
 	 *
-	 * @param array $data Array with entry/form/mode keys.
+	 * @param array<mixed> $data Array with entry/form/mode keys.
 	 *
 	 * @return void
 	 */
@@ -616,7 +645,7 @@ class GV_Entry_Revisions {
 
 		$entry = rgar( $data, 'entry' );
 		$form = rgar( $data, 'form' );
-		$revision = $this->get_revision( $entry['id'], rgget( 'revision' ) );
+		$revision = $this->get_revision( absint( $entry['id'] ), absint( rgget( 'revision' ) ) );
 
 		$diff_output = '';
 		$diffs = $this->get_diff( $revision, $entry, $form );
@@ -686,7 +715,7 @@ class GV_Entry_Revisions {
 	/**
 	 * Returns nonce URL to restore a revision
 	 *
-	 * @param array $revision Revision entry array
+	 * @param array<mixed> $revision Revision entry array
 	 *
 	 * @return string
 	 */
@@ -697,6 +726,18 @@ class GV_Entry_Revisions {
 		return wp_nonce_url( add_query_arg( array( 'restore' => $revision[ self::$entry_key ]['date_gmt'] ), remove_query_arg( 'revision' ) ), $nonce_action );
 	}
 
+	/**
+	 * Function: get_revision_details_link.
+	 *
+	 * @author GravityWP
+	 * @since v0.0.1
+	 * @version v1.0.0
+	 * @access private
+	 *
+	 * @param array<mixed> $revision Default: array()
+	 *
+	 * @return mixed
+	 */
 	private function get_revision_details_link( $revision = array() ) {
 		return add_query_arg( array( 'revision' => $revision[ self::$entry_key ]['date_gmt'] ) );
 	}
@@ -708,7 +749,7 @@ class GV_Entry_Revisions {
 	 *
 	 * @see wp_post_revision_title() for inspiration
 	 *
-	 * @param array $revision Revision entry array
+	 * @param array<mixed> $revision Revision entry array
 	 * @param bool       $link     Optional, default is true. Link to revision details page?
 	 * @param string $format post revision title: 1: author avatar, 2: author name, 3: time ago, 4: date
 	 *
@@ -747,7 +788,7 @@ class GV_Entry_Revisions {
 	 *
 	 * @since 1.0
 	 *
-	 * @param array $data Array of data with entry, form, mode keys
+	 * @param array<mixed> $data Array of data with entry, form, mode keys
 	 *
 	 * @return void
 	 */
@@ -791,6 +832,15 @@ add_action( 'gform_loaded', array( 'GV_Entry_Revisions', 'load' ) );
 
 // Translation files of the plugin
 add_action('plugins_loaded', 'gv_entry_revisions_load_textdomain');
+	/**
+	 * Function: gv_entry_revisions_load_textdomain.
+	 *
+	 * @author GravityWP
+	 * @since v0.0.1
+	 * @version v1.0.0
+	 *
+	 * @return void
+	 */
 	function gv_entry_revisions_load_textdomain() {
 		load_plugin_textdomain( 'gravityview-entry-revisions', false, dirname( plugin_basename(__FILE__) ) . '/languages' );
 }
