@@ -17,6 +17,9 @@ Track changes to Gravity Forms entries and restore from previous revisions. Requ
 
 == Changelog ==
 
+= 1.1.2 =
+- Docblocks + minor type fixes.
+
 = 1.1.1 =
 - Do not dispay full file paths in the added note, only the basename.
 
