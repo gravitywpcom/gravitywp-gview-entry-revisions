@@ -2,7 +2,7 @@ parameters:
 	level: 6
 	phpVersion: 80229
 	paths:
-		- /
+		- .
 	scanDirectories:
 		- ../gravityforms
 		- ../gravityview

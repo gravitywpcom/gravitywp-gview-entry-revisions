@@ -1,7 +1,7 @@
 === Entry Revisions by GravityView ===
 Tags: gravityview, gravity forms
 Requires at least: 4.0
-Tested up to: 4.3
+Tested up to: 6.2
 Stable tag: trunk
 Contributors: gravityview
 License: GPL 3 or higher
@@ -16,6 +16,10 @@ Track changes to Gravity Forms entries and restore from previous revisions. Requ
 4. You'll see a "Revisions" meta box on the entries page. Click the link next to the revision to compare versions, and restore.
 
 == Changelog ==
+
+= 1.1.3 =
+- Fix PHP warnings.
+- Fix field value of '0' being shown as '[ empty ]'.
 
 = 1.1.2 =
 - Docblocks + minor type fixes.
