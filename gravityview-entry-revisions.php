@@ -3,7 +3,7 @@
  * Plugin Name:       	GravityView - Gravity Forms Entry Revisions
  * Plugin URI:        	https://gravityview.co/extensions/entry-revisions/
  * Description:       	Track changes to Gravity Forms entries and restore from previous revisions. Requires Gravity Forms 2.0 or higher.
- * Version:          	1.1.2
+ * Version:          	1.1.3
  * Author:            	GravityView
  * Author URI:        	https://gravityview.co
  * Text Domain:       	gv-entry-revisions
@@ -187,105 +187,106 @@ class GV_Entry_Revisions {
 		foreach ( $changed_fields as $key => $old_value ) {
 		    $field = RGFormsModel::get_field( $form, $key );
 
-		    if ( 'list' == $field->type ) {
-		        if ( ! empty( $old_value ) ) {
-		            $old_value_arr = unserialize( $old_value );
-			        $old_value = "\r\n";
+			if ( isset( $field->type ) ){
+				if ( 'list' == $field->type ) {
+					if ( ! empty( $old_value ) ) {
+						$old_value_arr = unserialize( $old_value );
+						$old_value = "\r\n";
 
-		            if ( is_array( $old_value_arr ) ) {
-			            foreach ( $old_value_arr as $_key => $row ) {
-				            $old_value .= 'Row ' . ( $_key + 1 ) . ': ';
-				            $row = array_values( $row );
-				            $old_value .= implode( ', ', $row ) . "\r\n";
-			            }
-                    }
-                }
-
-			    if ( ! empty( $current_entry[$key] ) ) {
-				    $new_value_arr = unserialize( $current_entry[$key] );
-				    $new_value = "\r\n";
-
-				    if ( is_array( $new_value_arr ) ) {
-					    foreach ( $new_value_arr as $_key => $row ) {
-						    $new_value .= 'Row ' . ( $_key + 1 ) . ': ';
-						    $row = array_values( $row );
-						    $new_value .= implode( ', ', $row ) . "\r\n";
-					    }
-                    }
-
-				    $current_entry[$key] = $new_value;
-			    }
-            } elseif ( 'multiselect' == $field->type ) {
-		        $choices = (array) $field->choices;
-		        $choice_labels = wp_list_pluck( $choices, 'text' );
-		        $choice_values = wp_list_pluck( $choices, 'value' );
-
-			    if ( ! empty( $old_value ) ) {
-                    $old_value_arr = json_decode( $old_value );
-				    $_old_value_arr = array();
-
-                    foreach ( $old_value_arr as $arr_value ) {
-	                    $_key = array_search( $arr_value, $choice_values );
-                        if ( false !== $_key ) {
-	                        $_old_value_arr[] = $choice_labels[$_key];
-                        }
-                    }
-
-                    $old_value = json_encode( $_old_value_arr );
-			    } 
-
-			    if ( ! empty( $current_entry[$key] ) ) {
-				    $new_value_arr = json_decode( $current_entry[$key] );
-				    $_new_value_arr = array();
-
-				    foreach ( $new_value_arr as $arr_value ) {
-					    $_key = array_search( $arr_value, $choice_values );
-					    if ( false !== $_key ) {
-						    $_new_value_arr[] = $choice_labels[$_key];
-					    }
-				    }
-
-				    $current_entry[$key] = json_encode( $_new_value_arr );
-			    }
-            } elseif ( 'fileupload' == $field->type ) {
-
-				if ( ! empty( $old_value ) ) {
-					if ( $field->multipleFiles ) {
-						$urls = json_decode( $old_value );
-						foreach ( $urls as &$url ) {
-							$url = wp_basename( $url );
+						if ( is_array( $old_value_arr ) ) {
+							foreach ( $old_value_arr as $_key => $row ) {
+								$old_value .= 'Row ' . ( $_key + 1 ) . ': ';
+								$row = array_values( $row );
+								$old_value .= implode( ', ', $row ) . "\r\n";
+							}
 						}
-						$old_value = json_encode( $urls );
-					} else {
-						$old_value = wp_basename( $old_value );
 					}
-			    } 
 
-			    if ( ! empty( $current_entry[$key] ) ) {
-					if ( $field->multipleFiles ) {
-						$urls = json_decode( $current_entry[$key] );
-						foreach ( $urls as &$url ) {
-							$url = wp_basename( $url );
+					if ( ! empty( $current_entry[$key] ) ) {
+						$new_value_arr = unserialize( $current_entry[$key] );
+						$new_value = "\r\n";
+
+						if ( is_array( $new_value_arr ) ) {
+							foreach ( $new_value_arr as $_key => $row ) {
+								$new_value .= 'Row ' . ( $_key + 1 ) . ': ';
+								$row = array_values( $row );
+								$new_value .= implode( ', ', $row ) . "\r\n";
+							}
 						}
-						$current_entry[$key] = json_encode( $urls );
-					} else {
-						$current_entry[$key] = wp_basename( $current_entry[$key] );
+
+						$current_entry[$key] = $new_value;
 					}
-			    }
+				} elseif ( 'multiselect' == $field->type ) {
+					$choices = (array) $field->choices;
+					$choice_labels = wp_list_pluck( $choices, 'text' );
+					$choice_values = wp_list_pluck( $choices, 'value' );
 
+					if ( ! empty( $old_value ) ) {
+						$old_value_arr = json_decode( $old_value );
+						$_old_value_arr = array();
 
+						foreach ( $old_value_arr as $arr_value ) {
+							$_key = array_search( $arr_value, $choice_values );
+							if ( false !== $_key ) {
+								$_old_value_arr[] = $choice_labels[$_key];
+							}
+						}
 
+						$old_value = json_encode( $_old_value_arr );
+					} 
+
+					if ( ! empty( $current_entry[$key] ) ) {
+						$new_value_arr = json_decode( $current_entry[$key] );
+						$_new_value_arr = array();
+
+						foreach ( $new_value_arr as $arr_value ) {
+							$_key = array_search( $arr_value, $choice_values );
+							if ( false !== $_key ) {
+								$_new_value_arr[] = $choice_labels[$_key];
+							}
+						}
+
+						$current_entry[$key] = json_encode( $_new_value_arr );
+					}
+				} elseif ( 'fileupload' == $field->type ) {
+
+					if ( ! empty( $old_value ) ) {
+						if ( $field->multipleFiles ) {
+							$urls = json_decode( $old_value );
+							foreach ( $urls as &$url ) {
+								$url = wp_basename( $url );
+							}
+							$old_value = json_encode( $urls );
+						} else {
+							$old_value = wp_basename( $old_value );
+						}
+					} 
+
+					if ( ! empty( $current_entry[$key] ) ) {
+						if ( $field->multipleFiles ) {
+							$urls = json_decode( $current_entry[$key] );
+							foreach ( $urls as &$url ) {
+								$url = wp_basename( $url );
+							}
+							$current_entry[$key] = json_encode( $urls );
+						} else {
+							$current_entry[$key] = wp_basename( $current_entry[$key] );
+						}
+					}
+				}
 			}
 			
-			if (empty ($old_value)) {
+			if ( $old_value === '' ) {
 			$old_value = "[ " . __( 'empty', 'gravityview-entry-revisions' ) . " ]";
 			}
 			
-			if (empty ($current_entry[$key])) {
+			if ( $current_entry[$key] === '' ) {
 			$current_entry[$key] = "[ " . __( 'empty', 'gravityview-entry-revisions' ) . " ]";
 			}
+
+			$field_label = isset( $field->label ) ? $field->label : $key;
 	
-		    $note .= __( 'Field', 'gravityview-entry-revisions' ) . " " . $field->label . "\n" . __( 'changed from', 'gravityview-entry-revisions' ) . ": " . $old_value  . "\n" . __( 'to', 'gravityview-entry-revisions' ) . ": " . $current_entry[$key] . "\r\n" . "\n";
+		    $note .= __( 'Field', 'gravityview-entry-revisions' ) . " " . $field_label . "\n" . __( 'changed from', 'gravityview-entry-revisions' ) . ": " . $old_value  . "\n" . __( 'to', 'gravityview-entry-revisions' ) . ": " . $current_entry[$key] . "\r\n" . "\n";
         }
 		RGFormsModel::add_note( $entry_or_entry_id, get_current_user_id(), $user_data->display_name, $note );
 
@@ -365,7 +366,7 @@ class GV_Entry_Revisions {
 		return $revision;
 	}
 
-	/**
+	/*
 	 * Deletes all revisions for an entry
 	 *
 	 * @author GravityWP
@@ -374,10 +375,12 @@ class GV_Entry_Revisions {
 	 * @access private
 	 *
 	 * @param int $entry_id ID of the entry to remove revsions
-	 */
+	 * 
+	 * @return int|bool
 	private function delete_revisions( $entry_id = 0 ) {
 		gform_delete_meta( $entry_id, self::$meta_key );
 	}
+	*/
 
 	/**
 	 * Remove a revision from an entry
@@ -606,7 +609,7 @@ class GV_Entry_Revisions {
 			$label = GFCommon::get_label( $field );
 
 			$diff = wp_text_diff( $previous_value, $current_value, array(
-				'show_split_view' => 1,
+				'show_split_view' => true,
 				'title' => sprintf( esc_html__( '%s (Field %s)', 'gravityview-entry-revisions' ), $label, $key ),
 				'title_left' => esc_html__( 'Entry Revision', 'gravityview-entry-revisions' ),
 				'title_right' => esc_html__( 'Current Entry', 'gravityview-entry-revisions' ),
@@ -709,7 +712,7 @@ class GV_Entry_Revisions {
 	 * @return string
 	 */
 	private function generate_restore_nonce_action( $entry_id = 0, $revision_date_gmt = 0 ) {
-		return sprintf( 'gv-restore-entry-%d-revision-%d', intval( $entry_id ), intval( $revision_date_gmt ), 'gv-restore-entry' );
+		return sprintf( 'gv-restore-entry-%d-revision-%d', intval( $entry_id ), intval( $revision_date_gmt ) );
 	}
 
 	/**
