@@ -16,6 +16,8 @@ Track changes to Gravity Forms entries and restore from previous revisions. Requ
 4. You'll see a "Revisions" meta box on the entries page. Click the link next to the revision to compare versions, and restore.
 
 == Changelog ==
+= 1.2 =
+- Renamed the main class to avoid issues with other plugins.
 
 = 1.1.3 =
 - Fix PHP warnings.
