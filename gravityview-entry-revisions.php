@@ -847,3 +847,77 @@ add_action('plugins_loaded', 'gv_entry_revisions_load_textdomain');
 	function gv_entry_revisions_load_textdomain() {
 		load_plugin_textdomain( 'gravityview-entry-revisions', false, dirname( plugin_basename(__FILE__) ) . '/languages' );
 }
+
+/**
+ * Updates the changelog when an entry is updated with Inline Edit.
+ *
+ * This function is hooked to the `gravityview-inline-edit/entry-updated` filter and logs changes made to form entries.
+ * It compares the old and new field values and adds a note to the entry with details of the change.
+ *
+ * @param bool  $update_result  Whether the update was successful.
+ * @param array $entry          The updated entry data.
+ * @param int   $form_id        The ID of the form being updated.
+ * @param array $gf_field       The Gravity Forms field data.
+ * @param array $original_entry The original entry data before update.
+ *
+ * @return bool Returns the result of the update operation.
+ */
+function aiwos_update_changelog_on_inline_edit( $update_result, $entry, $form_id, $gf_field, $original_entry ) {
+
+	if ( $update_result ) {
+
+		$user      = wp_get_current_user();
+		$field_id  = $gf_field['id'] ?? '';
+		$old_value = $original_entry[ $field_id ] ?? '';
+		$new_value = $entry[ $field_id ] ?? '';
+
+		$note = __( 'Field', 'gv-entry-revisions' ) . ' ' . $gf_field['label'] . "\n" . '&nbsp;&nbsp;-- ' . __( 'From', 'gv-entry-revisions' ) . ': ' . $old_value . "\n" . '&nbsp;&nbsp;-- ' . __( 'To', 'gv-entry-revisions' ) . ': ' . $new_value . "\r\n\n";
+
+		RGFormsModel::add_note( $entry['id'], $user->ID, $user->display_name, $note );
+	}
+	return $update_result;
+}
+add_filter( 'gravityview-inline-edit/entry-updated', 'aiwos_update_changelog_on_inline_edit', 10, 5 );
+
+/**
+ * Updates the changelog when an entry is updated by a workflow step of another form.
+ *
+ * This function is triggered on the `gform_post_update_entry` action.
+ * It compares the original entry with the updated entry and logs any field changes.
+ * An entry note is added for each changed field, detailing the old and new values.
+ *
+ * @param array $entry          The updated entry data.
+ * @param array $original_entry The original entry data before update.
+ *
+ * @return array Returns the updated entry data.
+ */
+function aiwos_update_changelog_on_workflow_step_other_form( $entry, $original_entry ) {
+
+	// Duplicate original entry to check for changes.
+	$changed_fields = $original_entry;
+
+	foreach ( $changed_fields as $key => $old_value ) {
+
+		if ( rgar( $entry, $key ) === $old_value ) {
+			unset( $changed_fields[ $key ] );
+		} elseif ( empty( $entry[ $key ] ) && empty( $old_value ) ) {
+			unset( $changed_fields[ $key ] );
+		}
+	}
+	if ( count( $changed_fields ) > 0 ) {
+
+		// Log changes.
+		$note_title = __( 'Workflow step', 'aiwos-default' );
+		$note       = '';
+
+		foreach ( $changed_fields as $key => $new_value ) {
+
+			$field = RGFormsModel::get_field( $entry['form_id'], $key ) ?? '';
+
+			$note .= __( 'Field', 'gv-entry-revisions' ) . ' ' . $field['label'] . "\n" . '&nbsp;&nbsp;-- ' . __( 'From', 'gv-entry-revisions' ) . ': ' . $entry[ $key ] . "\n" . '&nbsp;&nbsp;-- ' . __( 'To', 'gv-entry-revisions' ) . ': ' . $new_value . "\r\n\n";
+		}
+		RGFormsModel::add_note( $entry['id'], 0, $note_title, $note );
+	}
+	return $entry;
+}
+add_action( 'gform_post_update_entry', 'aiwos_update_changelog_on_workflow_step_other_form', 10, 2 );
