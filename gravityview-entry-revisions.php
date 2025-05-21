@@ -286,7 +286,7 @@ class GWP_GV_Entry_Revisions {
 
 			$field_label = isset( $field->label ) ? $field->label : $key;
 	
-		    $note .= __( 'Field', 'gravityview-entry-revisions' ) . " " . $field_label . "\n" . '&nbsp;&nbsp;&#x1F78D; ' . __( 'From', 'gravityview-entry-revisions' ) . ": " . $old_value  . "\n" . '&nbsp;&nbsp;&#x1F78D; ' . __( 'To', 'gravityview-entry-revisions' ) . ": " . $current_entry[$key] . "\r\n" . "\n";
+		    $note .= __( 'Field', 'gravityview-entry-revisions' ) . " " . $field_label . "\n" . '&nbsp;&nbsp;-- ' . __( 'From', 'gravityview-entry-revisions' ) . ": " . $old_value  . "\n" . '&nbsp;&nbsp;-- ' . __( 'To', 'gravityview-entry-revisions' ) . ": " . $current_entry[$key] . "\r\n" . "\n";
         }
 		RGFormsModel::add_note( $entry_or_entry_id, get_current_user_id(), $user_data->display_name, $note );
 
