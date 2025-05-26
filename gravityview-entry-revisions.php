@@ -156,7 +156,7 @@ class GWP_GV_Entry_Revisions {
 
 		if ( count( $form ) > 0 ) {
 			$triggered_by_form_id = isset( $_GET['id'] ) ? sanitize_key( wp_unslash( $_GET['id'] ) ) : '';
-			$form['note_title'] = __( 'Update Entry by form #', 'gv-entry-revisions' ) . $triggered_by_form_id;
+			$form['note_title']   = __( 'Update Entry by form #', 'gv-entry-revisions' ) . $triggered_by_form_id;
 			$this->save( $form, $entry['id'], $original_entry );
 		}
 		return $entry;
