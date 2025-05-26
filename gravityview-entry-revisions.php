@@ -158,6 +158,20 @@ class GWP_GV_Entry_Revisions {
 		return $entry;
 	}
 
+	/**
+	 * Updates the changelog when an inline edit is performed.
+	 *
+	 * This function is triggered after an entry is updated on inline edit. It saves the changes to the changelog
+	 * and returns the result of the update operation.
+	 *
+	 * @param bool $update_result    The result of the update operation, true if successful, false otherwise.
+	 * @param array $entry           The updated entry array containing the new values.
+	 * @param int $form_id           The ID of the form associated with the entry.
+	 * @param mixed $gf_field        The Gravity Forms field that was edited.
+	 * @param array $original_entry  The original entry array prior to the update.
+	 *
+	 * @return bool                  Returns the result of the update operation.
+	 */
 	public function aiwos_update_changelog_on_inline_edit( $update_result, $entry, $form_id, $gf_field, $original_entry ) {
 
 		$form = RGFormsModel::get_form_meta( $entry['form_id'] );
