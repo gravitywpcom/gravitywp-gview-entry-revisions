@@ -1,19 +1,20 @@
 <?php
 /**
- * Plugin Name:       	GravityView - Gravity Forms Entry Revisions
- * Plugin URI:        	https://gravityview.co/extensions/entry-revisions/
- * Description:       	Track changes to Gravity Forms entries and restore from previous revisions. Requires Gravity Forms 2.0 or higher.
- * Version:          	1.2.1
- * Author:            	GravityView
- * Author URI:        	https://gravityview.co
- * Text Domain:       	gv-entry-revisions
- * License:           	GPLv2 or later
- * License URI: 		http://www.gnu.org/licenses/gpl-2.0.html
- * Domain Path:			/languages
+ * Plugin Name:         GravityView - Gravity Forms Entry Revisions
+ * Plugin URI:          https://gravityview.co/extensions/entry-revisions/
+ * Description:         Track changes to Gravity Forms entries and restore from previous revisions. Requires Gravity Forms 2.0 or higher.
+ * Version:             1.2.1
+ * Author:              GravityView
+ * Author URI:          https://gravityview.co
+ * Text Domain:         gv-entry-revisions
+ * License:             GPLv2 or later
+ * License URI:         http://www.gnu.org/licenses/gpl-2.0.html
+ * Domain Path:         /languages
  */
 
 /**
  * Class GWP_GV_Entry_Revisions
+ *
  * @todo revision date merge tag
  */
 class GWP_GV_Entry_Revisions {
@@ -40,12 +41,11 @@ class GWP_GV_Entry_Revisions {
 	 * @version v1.0.0
 	 * @access public static
 	 *
-	 *
 	 * @return void
 	 */
 	public static function load() {
-		if( ! did_action( 'gv_entry_versions_loaded' ) ) {
-			new self;
+		if ( ! did_action( 'gv_entry_versions_loaded' ) ) {
+			new self();
 			do_action( 'gv_entry_versions_loaded' );
 		}
 	}
@@ -57,7 +57,6 @@ class GWP_GV_Entry_Revisions {
 	 * @since v1.0
 	 * @version v1.0.0
 	 * @access private
-	 *
 	 *
 	 * @return void
 	 */
@@ -73,16 +72,19 @@ class GWP_GV_Entry_Revisions {
 	 * @version v1.0.0
 	 * @access private
 	 *
-	 *
 	 * @return void
 	 */
 	private function add_hooks() {
 
-	    // Save entry revision on the front end and back end
+		// Save entry revision after updated by workflow from other form.
+		add_action( 'gform_post_update_entry', array( $this, 'aiwos_update_changelog_on_workflow_step_other_form' ), 10, 2 );
+		// Save entry revision after inline edit.
+		add_filter( 'gravityview-inline-edit/entry-updated', array( $this, 'aiwos_update_changelog_on_inline_edit' ), 10, 5 );
+		// Save entry revision on the front end and back end.
 		add_action( 'gform_after_update_entry', array( $this, 'save' ), 10, 3 );
 
-		// We only run on the entry detail page
-		if( 'entry_detail' !== GFForms::get_page() ) {
+		// We only run on the entry detail page.
+		if ( 'entry_detail' !== GFForms::get_page() ) {
 			return;
 		}
 
@@ -91,7 +93,7 @@ class GWP_GV_Entry_Revisions {
 		add_action( 'admin_init', array( $this, 'restore' ) );
 
 		// If showing a revision, get rid of all metaboxes and lingering HTML stuff
-		if( isset( $_GET['revision'] ) ) {
+		if ( isset( $_GET['revision'] ) ) {
 			add_action( 'gform_entry_detail_sidebar_before', array( $this, 'start_ob_start' ) );
 			add_action( 'gform_entry_detail_content_before', array( $this, 'start_ob_start' ) );
 
@@ -102,6 +104,7 @@ class GWP_GV_Entry_Revisions {
 
 	/**
 	 * Alias for ob_start(), since output buffering and actions don't get along
+	 *
 	 * @since 1.0
 	 * @return void
 	 */
@@ -111,6 +114,7 @@ class GWP_GV_Entry_Revisions {
 
 	/**
 	 * Alias for ob_clean(), since output buffering and actions don't get along
+	 *
 	 * @since 1.0
 	 * @return void
 	 */
@@ -123,9 +127,9 @@ class GWP_GV_Entry_Revisions {
 	 *
 	 * @since 1.0
 	 *
-	 * @param array<mixed>   $form           The form object for the entry.
-	 * @param integer $entry_id     The entry ID.
-	 * @param array<mixed>   $original_entry The entry object before being updated.
+	 * @param array<mixed> $form           The form object for the entry.
+	 * @param integer      $entry_id     The entry ID.
+	 * @param array<mixed> $original_entry The entry object before being updated.
 	 *
 	 * @return void
 	 */
@@ -134,19 +138,49 @@ class GWP_GV_Entry_Revisions {
 	}
 
 	/**
+	 * Updates the changelog when an entry is updated by a workflow step of another form.
+	 *
+	 * This function is triggered on the `gform_post_update_entry` action.
+	 * It compares the original entry with the updated entry and logs any field changes.
+	 * An entry note is added for each changed field, detailing the old and new values.
+	 *
+	 * @param array $entry          The updated entry data.
+	 * @param array $original_entry The original entry data before update.
+	 *
+	 * @return array Returns the updated entry data.
+	 */
+	public function aiwos_update_changelog_on_workflow_step_other_form( $entry, $original_entry ) {
+
+		$form = RGFormsModel::get_form_meta( $entry['form_id'] );
+
+		$this->save( $form, $entry['id'], $original_entry );
+
+		return $entry;
+	}
+
+	public function aiwos_update_changelog_on_inline_edit( $update_result, $entry, $form_id, $gf_field, $original_entry ) {
+
+		$form = RGFormsModel::get_form_meta( $entry['form_id'] );
+
+		$this->save( $form, $entry['id'], $original_entry );
+
+		return $update_result;
+	}
+
+	/**
 	 * Adds a revision for an entry
 	 *
 	 * @since 1.0
 	 *
-     * @param array<mixed> $form The form object for the entry.
+	 * @param array<mixed>     $form The form object for the entry.
 	 * @param int|array<mixed> $entry_or_entry_id Current entry ID or current entry array
-	 * @param array<mixed> $revision_to_add Previous entry data to add as a revision
+	 * @param array<mixed>     $revision_to_add Previous entry data to add as a revision
 	 *
 	 * @return bool false: Nothing changed; true: updated
 	 */
 	private function add_revision( $form, $entry_or_entry_id = 0, $revision_to_add = array() ) {
 
-		if( ! is_array( $entry_or_entry_id ) && is_numeric( $entry_or_entry_id ) ) {
+		if ( ! is_array( $entry_or_entry_id ) && is_numeric( $entry_or_entry_id ) ) {
 			$current_entry = GFAPI::get_entry( $entry_or_entry_id );
 		} else {
 			$current_entry = $entry_or_entry_id;
@@ -160,17 +194,17 @@ class GWP_GV_Entry_Revisions {
 		$changed_fields = $this->get_modified_entry_fields( $revision_to_add, $current_entry );
 
 		// Nothing changed
-		if( empty( $changed_fields ) ) {
+		if ( empty( $changed_fields ) ) {
 			return false;
 		}
 
 		$revisions = $this->get_revisions( $entry_or_entry_id );
 
 		$revision_to_add[ self::$entry_key ] = array(
-			'date' => current_time( 'timestamp', 0 ),
-			'date_gmt' => current_time( 'timestamp', 1 ),
-			'user_id' => get_current_user_id(),
-			'changed' => $changed_fields,
+			'date'     => current_time( 'timestamp', 0 ),
+			'date_gmt' => time(),
+			'user_id'  => get_current_user_id(),
+			'changed'  => $changed_fields,
 		);
 
 		if ( empty( $revisions ) ) {
@@ -183,70 +217,70 @@ class GWP_GV_Entry_Revisions {
 
 		// Add note so we can display the record on the front end
 		$user_data = get_userdata( get_current_user_id() );
-		$note = '';
+		$note      = '';
 		foreach ( $changed_fields as $key => $old_value ) {
-		    $field = RGFormsModel::get_field( $form, $key );
+			$field = RGFormsModel::get_field( $form, $key );
 
-			if ( isset( $field->type ) ){
+			if ( isset( $field->type ) ) {
 				if ( 'list' == $field->type ) {
 					if ( ! empty( $old_value ) ) {
 						$old_value_arr = unserialize( $old_value );
-						$old_value = "\r\n";
+						$old_value     = "\r\n";
 
 						if ( is_array( $old_value_arr ) ) {
 							foreach ( $old_value_arr as $_key => $row ) {
 								$old_value .= 'Row ' . ( $_key + 1 ) . ': ';
-								$row = array_values( $row );
+								$row        = array_values( $row );
 								$old_value .= implode( ', ', $row ) . "\r\n";
 							}
 						}
 					}
 
-					if ( ! empty( $current_entry[$key] ) ) {
-						$new_value_arr = unserialize( $current_entry[$key] );
-						$new_value = "\r\n";
+					if ( ! empty( $current_entry[ $key ] ) ) {
+						$new_value_arr = unserialize( $current_entry[ $key ] );
+						$new_value     = "\r\n";
 
 						if ( is_array( $new_value_arr ) ) {
 							foreach ( $new_value_arr as $_key => $row ) {
 								$new_value .= 'Row ' . ( $_key + 1 ) . ': ';
-								$row = array_values( $row );
+								$row        = array_values( $row );
 								$new_value .= implode( ', ', $row ) . "\r\n";
 							}
 						}
 
-						$current_entry[$key] = $new_value;
+						$current_entry[ $key ] = $new_value;
 					}
 				} elseif ( 'multiselect' == $field->type ) {
-					$choices = (array) $field->choices;
+					$choices       = (array) $field->choices;
 					$choice_labels = wp_list_pluck( $choices, 'text' );
 					$choice_values = wp_list_pluck( $choices, 'value' );
 
 					if ( ! empty( $old_value ) ) {
-						$old_value_arr = json_decode( $old_value );
+						$old_value_arr  = json_decode( $old_value );
 						$_old_value_arr = array();
 
 						foreach ( $old_value_arr as $arr_value ) {
 							$_key = array_search( $arr_value, $choice_values );
 							if ( false !== $_key ) {
-								$_old_value_arr[] = $choice_labels[$_key];
+								$_old_value_arr[] = $choice_labels[ $_key ];
 							}
 						}
 
 						$old_value = json_encode( $_old_value_arr );
-					} 
+					}
 
-					if ( ! empty( $current_entry[$key] ) ) {
-						$new_value_arr = json_decode( $current_entry[$key] );
+					if ( ! empty( $current_entry[ $key ] ) ) {
+						$new_value_arr  = json_decode( $current_entry[ $key ] );
 						$_new_value_arr = array();
 
 						foreach ( $new_value_arr as $arr_value ) {
 							$_key = array_search( $arr_value, $choice_values );
 							if ( false !== $_key ) {
-								$_new_value_arr[] = $choice_labels[$_key];
+								$_new_value_arr[] = $choice_labels[ $_key ];
 							}
 						}
 
-						$current_entry[$key] = json_encode( $_new_value_arr );
+						$current_entry[ $key ] = json_encode( $_new_value_arr );
 					}
 				} elseif ( 'fileupload' == $field->type ) {
 
@@ -260,34 +294,34 @@ class GWP_GV_Entry_Revisions {
 						} else {
 							$old_value = wp_basename( $old_value );
 						}
-					} 
+					}
 
-					if ( ! empty( $current_entry[$key] ) ) {
+					if ( ! empty( $current_entry[ $key ] ) ) {
 						if ( $field->multipleFiles ) {
-							$urls = json_decode( $current_entry[$key] );
+							$urls = json_decode( $current_entry[ $key ] );
 							foreach ( $urls as &$url ) {
 								$url = wp_basename( $url );
 							}
-							$current_entry[$key] = json_encode( $urls );
+							$current_entry[ $key ] = json_encode( $urls );
 						} else {
-							$current_entry[$key] = wp_basename( $current_entry[$key] );
+							$current_entry[ $key ] = wp_basename( $current_entry[ $key ] );
 						}
 					}
 				}
 			}
-			
+
 			if ( $old_value === '' ) {
-			$old_value = "[ " . __( 'empty', 'gv-entry-revisions' ) . " ]";
+				$old_value = '[ ' . __( 'empty', 'gv-entry-revisions' ) . ' ]';
 			}
-			
-			if ( $current_entry[$key] === '' ) {
-			$current_entry[$key] = "[ " . __( 'empty', 'gv-entry-revisions' ) . " ]";
+
+			if ( $current_entry[ $key ] === '' ) {
+				$current_entry[ $key ] = '[ ' . __( 'empty', 'gv-entry-revisions' ) . ' ]';
 			}
 
 			$field_label = isset( $field->label ) ? $field->label : $key;
-	
-		    $note .= __( 'Field', 'gv-entry-revisions' ) . " " . $field_label . "\n" . '&nbsp;&nbsp;-- ' . __( 'From', 'gv-entry-revisions' ) . ": " . $old_value  . "\n" . '&nbsp;&nbsp;-- ' . __( 'To', 'gv-entry-revisions' ) . ": " . $current_entry[$key] . "\r\n" . "\n";
-        }
+
+			$note .= __( 'Field', 'gv-entry-revisions' ) . ' ' . $field_label . "\n" . '&nbsp;&nbsp;-- ' . __( 'From', 'gv-entry-revisions' ) . ': ' . $old_value . "\n" . '&nbsp;&nbsp;-- ' . __( 'To', 'gv-entry-revisions' ) . ': ' . $current_entry[ $key ] . "\r\n" . "\n";
+		}
 		RGFormsModel::add_note( $entry_or_entry_id, get_current_user_id(), $user_data->display_name, $note );
 
 		return true;
@@ -306,9 +340,9 @@ class GWP_GV_Entry_Revisions {
 
 		$return = $old;
 
-		foreach( $old as $key => $old_value ) {
+		foreach ( $old as $key => $old_value ) {
 			// Gravity Forms itself uses == comparison
-			if( rgar( $new, $key ) == $old_value ) {
+			if ( rgar( $new, $key ) == $old_value ) {
 				unset( $return[ $key ] );
 			}
 		}
@@ -327,10 +361,10 @@ class GWP_GV_Entry_Revisions {
 	 */
 	public function get_revisions( $entry_id = 0 ) {
 
-		$return = array();
+		$return    = array();
 		$revisions = gform_get_meta( $entry_id, self::$meta_key );
 
-		if( $revisions ) {
+		if ( $revisions ) {
 			$revisions = maybe_unserialize( $revisions );
 
 			// Single meta? Make it an array
@@ -349,7 +383,7 @@ class GWP_GV_Entry_Revisions {
 	 * @version v1.0.0
 	 * @access public
 	 *
-	 * @param int $entry_id 
+	 * @param int $entry_id
 	 *
 	 * @return array<mixed> Empty array, if no revisions exist. Otherwise, last revision.
 	 */
@@ -375,7 +409,7 @@ class GWP_GV_Entry_Revisions {
 	 * @access private
 	 *
 	 * @param int $entry_id ID of the entry to remove revsions
-	 * 
+	 *
 	 * @return int|bool
 	private function delete_revisions( $entry_id = 0 ) {
 		gform_delete_meta( $entry_id, self::$meta_key );
@@ -396,13 +430,13 @@ class GWP_GV_Entry_Revisions {
 
 		$revisions = $this->get_revisions( $entry_id );
 
-		if( empty( $revisions ) ) {
+		if ( empty( $revisions ) ) {
 			return false;
 		}
 
 		foreach ( $revisions as $key => $revision ) {
-			if( intval( $revision_id ) === intval( $revision[self::$entry_key]['date_gmt'] ) ) {
-				unset( $revisions["{$key}"] );
+			if ( intval( $revision_id ) === intval( $revision[ self::$entry_key ]['date_gmt'] ) ) {
+				unset( $revisions[ "{$key}" ] );
 				break;
 			}
 		}
@@ -428,7 +462,7 @@ class GWP_GV_Entry_Revisions {
 
 		foreach ( $revisions as $revision ) {
 
-			if( intval( $revision_id ) === intval( rgars( $revision, self::$entry_key . '/date_gmt' ) ) ) {
+			if ( intval( $revision_id ) === intval( rgars( $revision, self::$entry_key . '/date_gmt' ) ) ) {
 				return $revision;
 			}
 		}
@@ -449,8 +483,15 @@ class GWP_GV_Entry_Revisions {
 		$revision = $this->get_revision( $entry_id, $revision_id );
 
 		// Revision has already been deleted or does not exist
-		if( empty( $revision ) ) {
-			return new WP_Error( 'not_found', __( 'Revision not found', 'gv-entry-revisions' ), array( 'entry_id' => $entry_id, 'revision_id' => $revision_id ) );
+		if ( empty( $revision ) ) {
+			return new WP_Error(
+				'not_found',
+				__( 'Revision not found', 'gv-entry-revisions' ),
+				array(
+					'entry_id'    => $entry_id,
+					'revision_id' => $revision_id,
+				)
+			);
 		}
 
 		$current_entry = GFAPI::get_entry( $entry_id );
@@ -458,7 +499,7 @@ class GWP_GV_Entry_Revisions {
 		/**
 		 * @param bool $restore_entry_meta Whether to restore entry meta as well as field values. Default: false
 		 */
-		if( false === apply_filters( 'gv-entry-revisions/restore-entry-meta', false ) ) {
+		if ( false === apply_filters( 'gv-entry-revisions/restore-entry-meta', false ) ) {
 
 			// Override revision details with current entry details
 			foreach ( $current_entry as $key => $value ) {
@@ -491,13 +532,14 @@ class GWP_GV_Entry_Revisions {
 
 			// Store the current entry as a revision, too, so you can revert
 			// AJK: commented out for now as this call has the wrong arguments and will do nothin good.
-			//$this->add_revision( $entry_id, $current_entry );
+			// $this->add_revision( $entry_id, $current_entry );
 
 			/**
 			 * Should the revision be removed after it has been restored? Default: false
+			 *
 			 * @param bool $remove_after_restore [Default: false]
 			 */
-			if( apply_filters( 'gv-entry-revisions/delete-after-restore', false ) ) {
+			if ( apply_filters( 'gv-entry-revisions/delete-after-restore', false ) ) {
 				$this->delete_revision( $entry_id, $revision_id );
 			}
 
@@ -514,22 +556,22 @@ class GWP_GV_Entry_Revisions {
 	 */
 	public function restore() {
 
-		if( rgget('restore') && rgget('view') && rgget( 'lid' ) ) {
+		if ( rgget( 'restore' ) && rgget( 'view' ) && rgget( 'lid' ) ) {
 
 			// No access!
-			if( ! GFCommon::current_user_can_any( 'gravityforms_edit_entries' ) ) {
+			if ( ! GFCommon::current_user_can_any( 'gravityforms_edit_entries' ) ) {
 				GFCommon::log_error( 'Restoring the entry revision failed: user does not have the "gravityforms_edit_entries" capability.' );
 				return;
 			}
 
-			$revision_id = rgget( 'restore' );
-			$entry_id = rgget( 'lid' );
-			$nonce = rgget( '_wpnonce' );
+			$revision_id  = rgget( 'restore' );
+			$entry_id     = rgget( 'lid' );
+			$nonce        = rgget( '_wpnonce' );
 			$nonce_action = $this->generate_restore_nonce_action( absint( $entry_id ), absint( $revision_id ) );
-			$valid = wp_verify_nonce( $nonce, $nonce_action );
+			$valid        = wp_verify_nonce( $nonce, $nonce_action );
 
 			// Nonce didn't validate
-			if( ! $valid ) {
+			if ( ! $valid ) {
 				GFCommon::log_error( 'Restoring the entry revision failed: nonce validation failed.' );
 				return;
 			}
@@ -555,10 +597,10 @@ class GWP_GV_Entry_Revisions {
 	 */
 	public function add_meta_box( $meta_boxes = array(), $entry = array(), $form = array() ) {
 
-		$revision_id = rgget('revision');
+		$revision_id = rgget( 'revision' );
 
-		if( ! empty( $revision_id )  ) {
-			$meta_boxes = array();
+		if ( ! empty( $revision_id ) ) {
+			$meta_boxes                    = array();
 			$meta_boxes[ self::$meta_key ] = array(
 				'title'    => 'Restore Entry Revision',
 				'callback' => array( $this, 'meta_box_restore_revision' ),
@@ -594,7 +636,7 @@ class GWP_GV_Entry_Revisions {
 		foreach ( $previous as $key => $previous_value ) {
 
 			// Don't compare `gv_revision` data
-			if( self::$entry_key === $key ) {
+			if ( self::$entry_key === $key ) {
 				continue;
 			}
 
@@ -602,21 +644,26 @@ class GWP_GV_Entry_Revisions {
 
 			$field = GFFormsModel::get_field( $form, $key );
 
-			if( ! $field ) {
+			if ( ! $field ) {
 				continue;
 			}
 
 			$label = GFCommon::get_label( $field );
 
-			$diff = wp_text_diff( $previous_value, $current_value, array(
-				'show_split_view' => true,
-				'title' => sprintf( esc_html__( '%s (Field %s)', 'gv-entry-revisions' ), $label, $key ),
-				'title_left' => esc_html__( 'Entry Revision', 'gv-entry-revisions' ),
-				'title_right' => esc_html__( 'Current Entry', 'gv-entry-revisions' ),
-			) );
+			$diff = wp_text_diff(
+				$previous_value,
+				$current_value,
+				array(
+					'show_split_view' => true,
+					'title'           => sprintf( esc_html__( '%1$s (Field %2$s)', 'gv-entry-revisions' ), $label, $key ),
+					'title_left'      => esc_html__( 'Entry Revision', 'gv-entry-revisions' ),
+					'title_right'     => esc_html__( 'Current Entry', 'gv-entry-revisions' ),
+				)
+			);
 
 			/**
 			 * Fix the issue when using 'title_left' and 'title_right' of TWO extra blank <td></td>s being added. We only want one.
+			 *
 			 * @see wp_text_diff()
 			 */
 			$diff = str_replace( "<tr class='diff-sub-title'>\n\t<td></td>", "<tr class='diff-sub-title'>\n\t", $diff );
@@ -642,20 +689,21 @@ class GWP_GV_Entry_Revisions {
 
 		$mode = rgar( $data, 'mode' );
 
-		if( 'view' !== $mode ) {
+		if ( 'view' !== $mode ) {
 			return;
 		}
 
-		$entry = rgar( $data, 'entry' );
-		$form = rgar( $data, 'form' );
+		$entry    = rgar( $data, 'entry' );
+		$form     = rgar( $data, 'form' );
 		$revision = $this->get_revision( absint( $entry['id'] ), absint( rgget( 'revision' ) ) );
 
 		$diff_output = '';
-		$diffs = $this->get_diff( $revision, $entry, $form );
+		$diffs       = $this->get_diff( $revision, $entry, $form );
 
 		if ( empty( $diffs ) ) {
 			echo '<h3>' . esc_html__( 'This revision is identical to the current entry.', 'gv-entry-revisions' ) . '</h3>';
-			?><a href="<?php echo esc_url( remove_query_arg( 'revision' ) ); ?>" class="button button-primary button-large"><?php esc_html_e( 'Return to Entry', 'gv-entry-revisions' ); ?></a><?php
+			?><a href="<?php echo esc_url( remove_query_arg( 'revision' ) ); ?>" class="button button-primary button-large"><?php esc_html_e( 'Return to Entry', 'gv-entry-revisions' ); ?></a>
+			<?php
 			return;
 		}
 
@@ -695,10 +743,10 @@ class GWP_GV_Entry_Revisions {
 		<hr />
 
 		<p class="wp-clearfix">
-			<a href="<?php echo $this->get_restore_url( $revision ); ?>" class="button button-primary button-hero alignleft" onclick="return confirm('<?php esc_attr_e( 'Are you sure? The Current Entry data will be replaced with the Entry Revision data shown.', 'gv-entry-revisions' ) ?>');"><?php esc_html_e( 'Restore This Entry Revision', 'gv-entry-revisions' ); ?></a>
+			<a href="<?php echo $this->get_restore_url( $revision ); ?>" class="button button-primary button-hero alignleft" onclick="return confirm('<?php esc_attr_e( 'Are you sure? The Current Entry data will be replaced with the Entry Revision data shown.', 'gv-entry-revisions' ); ?>');"><?php esc_html_e( 'Restore This Entry Revision', 'gv-entry-revisions' ); ?></a>
 			<a href="<?php echo esc_url( remove_query_arg( 'revision' ) ); ?>" class="button button-secondary button-hero alignright"><?php esc_html_e( 'Cancel: Keep Current Entry', 'gv-entry-revisions' ); ?></a>
 		</p>
-	<?php
+		<?php
 	}
 
 	/**
@@ -753,8 +801,8 @@ class GWP_GV_Entry_Revisions {
 	 * @see wp_post_revision_title() for inspiration
 	 *
 	 * @param array<mixed> $revision Revision entry array
-	 * @param bool       $link     Optional, default is true. Link to revision details page?
-	 * @param string $format post revision title: 1: author avatar, 2: author name, 3: time ago, 4: date
+	 * @param bool         $link     Optional, default is true. Link to revision details page?
+	 * @param string       $format post revision title: 1: author avatar, 2: author name, 3: time ago, 4: date
 	 *
 	 * @return string HTML of the revision version
 	 */
@@ -769,8 +817,8 @@ class GWP_GV_Entry_Revisions {
 		$datef = _x( 'F j, Y @ H:i:s', 'revision date format' );
 
 		$gravatar = get_avatar( $revision_user_id, 32 );
-		$date = date_i18n( $datef, $revision_details['date'] );
-		if ( $link ) { //&& current_user_can( 'edit_post', $revision->ID ) && $link = get_edit_post_link( $revision->ID ) )
+		$date     = date_i18n( $datef, $revision_details['date'] );
+		if ( $link ) { // && current_user_can( 'edit_post', $revision->ID ) && $link = get_edit_post_link( $revision->ID ) )
 			$link = $this->get_revision_details_link( $revision );
 			$date = "<a href='$link'>$date</a>";
 		}
@@ -779,7 +827,7 @@ class GWP_GV_Entry_Revisions {
 			$format,
 			$gravatar,
 			$author,
-			human_time_diff( $revision_details['date_gmt'], current_time( 'timestamp', true ) ),
+			human_time_diff( $revision_details['date_gmt'], time() ),
 			$date
 		);
 
@@ -799,16 +847,16 @@ class GWP_GV_Entry_Revisions {
 
 		$mode = rgar( $data, 'mode' );
 
-		if( 'view' !== $mode ) {
+		if ( 'view' !== $mode ) {
 			return;
 		}
 
-		$entry_id = rgars( $data, 'entry/id' );
-		$entry = rgar( $data, 'entry' );
-		$form = rgar( $data, 'form' );
+		$entry_id  = rgars( $data, 'entry/id' );
+		$entry     = rgar( $data, 'entry' );
+		$form      = rgar( $data, 'form' );
 		$revisions = $this->get_revisions( $entry_id );
 
-		if( empty( $revisions ) ) {
+		if ( empty( $revisions ) ) {
 			echo wpautop( esc_html__( 'This entry has no revisions.', 'gv-entry-revisions' ) );
 			return;
 		}
@@ -818,7 +866,7 @@ class GWP_GV_Entry_Revisions {
 			$diffs = $this->get_diff( $revision, $entry, $form );
 
 			// Only show if there are differences
-			if( ! empty( $diffs ) ) {
+			if ( ! empty( $diffs ) ) {
 				$rows .= "\t<li>" . $this->revision_title( $revision ) . "</li>\n";
 			}
 		}
@@ -827,14 +875,14 @@ class GWP_GV_Entry_Revisions {
 
 		echo "<ul class='post-revisions hide-if-no-js'>\n";
 		echo $rows;
-		echo "</ul>";
+		echo '</ul>';
 	}
 }
 
 add_action( 'gform_loaded', array( 'GWP_GV_Entry_Revisions', 'load' ) );
 
 // Translation files of the plugin
-add_action('plugins_loaded', 'gv_entry_revisions_load_textdomain');
+add_action( 'plugins_loaded', 'gv_entry_revisions_load_textdomain' );
 	/**
 	 * Function: gv_entry_revisions_load_textdomain.
 	 *
@@ -844,80 +892,6 @@ add_action('plugins_loaded', 'gv_entry_revisions_load_textdomain');
 	 *
 	 * @return void
 	 */
-	function gv_entry_revisions_load_textdomain() {
-		load_plugin_textdomain( 'gv-entry-revisions', false, dirname( plugin_basename(__FILE__) ) . '/languages' );
+function gv_entry_revisions_load_textdomain() {
+	load_plugin_textdomain( 'gv-entry-revisions', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
-
-/**
- * Updates the changelog when an entry is updated with Inline Edit.
- *
- * This function is hooked to the `gravityview-inline-edit/entry-updated` filter and logs changes made to form entries.
- * It compares the old and new field values and adds a note to the entry with details of the change.
- *
- * @param bool  $update_result  Whether the update was successful.
- * @param array $entry          The updated entry data.
- * @param int   $form_id        The ID of the form being updated.
- * @param array $gf_field       The Gravity Forms field data.
- * @param array $original_entry The original entry data before update.
- *
- * @return bool Returns the result of the update operation.
- */
-function aiwos_update_changelog_on_inline_edit( $update_result, $entry, $form_id, $gf_field, $original_entry ) {
-
-	if ( $update_result ) {
-
-		$user      = wp_get_current_user();
-		$field_id  = $gf_field['id'] ?? '';
-		$old_value = $original_entry[ $field_id ] ?? '';
-		$new_value = $entry[ $field_id ] ?? '';
-
-		$note = __( 'Field', 'gv-entry-revisions' ) . ' ' . $gf_field['label'] . "\n" . '&nbsp;&nbsp;-- ' . __( 'From', 'gv-entry-revisions' ) . ': ' . $old_value . "\n" . '&nbsp;&nbsp;-- ' . __( 'To', 'gv-entry-revisions' ) . ': ' . $new_value . "\r\n\n";
-
-		RGFormsModel::add_note( $entry['id'], $user->ID, $user->display_name, $note );
-	}
-	return $update_result;
-}
-add_filter( 'gravityview-inline-edit/entry-updated', 'aiwos_update_changelog_on_inline_edit', 10, 5 );
-
-/**
- * Updates the changelog when an entry is updated by a workflow step of another form.
- *
- * This function is triggered on the `gform_post_update_entry` action.
- * It compares the original entry with the updated entry and logs any field changes.
- * An entry note is added for each changed field, detailing the old and new values.
- *
- * @param array $entry          The updated entry data.
- * @param array $original_entry The original entry data before update.
- *
- * @return array Returns the updated entry data.
- */
-function aiwos_update_changelog_on_workflow_step_other_form( $entry, $original_entry ) {
-
-	// Duplicate original entry to check for changes.
-	$changed_fields = $original_entry;
-
-	foreach ( $changed_fields as $key => $old_value ) {
-
-		if ( rgar( $entry, $key ) === $old_value ) {
-			unset( $changed_fields[ $key ] );
-		} elseif ( empty( $entry[ $key ] ) && empty( $old_value ) ) {
-			unset( $changed_fields[ $key ] );
-		}
-	}
-	if ( count( $changed_fields ) > 0 ) {
-
-		// Log changes.
-		$note_title = __( 'Workflow step', 'aiwos-default' );
-		$note       = '';
-
-		foreach ( $changed_fields as $key => $new_value ) {
-
-			$field = RGFormsModel::get_field( $entry['form_id'], $key ) ?? '';
-
-			$note .= __( 'Field', 'gv-entry-revisions' ) . ' ' . $field['label'] . "\n" . '&nbsp;&nbsp;-- ' . __( 'From', 'gv-entry-revisions' ) . ': ' . $entry[ $key ] . "\n" . '&nbsp;&nbsp;-- ' . __( 'To', 'gv-entry-revisions' ) . ': ' . $new_value . "\r\n\n";
-		}
-		RGFormsModel::add_note( $entry['id'], 0, $note_title, $note );
-	}
-	return $entry;
-}
-add_action( 'gform_post_update_entry', 'aiwos_update_changelog_on_workflow_step_other_form', 10, 2 );
