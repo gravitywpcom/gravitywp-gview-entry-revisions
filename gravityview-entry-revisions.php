@@ -92,7 +92,7 @@ class GWP_GV_Entry_Revisions {
 
 		add_action( 'admin_init', array( $this, 'restore' ) );
 
-		// If showing a revision, get rid of all metaboxes and lingering HTML stuff
+		// If showing a revision, get rid of all metaboxes and lingering HTML stuff.
 		if ( isset( $_GET['revision'] ) ) {
 			add_action( 'gform_entry_detail_sidebar_before', array( $this, 'start_ob_start' ) );
 			add_action( 'gform_entry_detail_content_before', array( $this, 'start_ob_start' ) );
@@ -195,8 +195,8 @@ class GWP_GV_Entry_Revisions {
 	 * @since 1.0
 	 *
 	 * @param array<mixed>     $form The form object for the entry.
-	 * @param int|array<mixed> $entry_or_entry_id Current entry ID or current entry array
-	 * @param array<mixed>     $revision_to_add Previous entry data to add as a revision
+	 * @param int|array<mixed> $entry_or_entry_id Current entry ID or current entry array.
+	 * @param array<mixed>     $revision_to_add Previous entry data to add as a revision.
 	 *
 	 * @return bool false: Nothing changed; true: updated
 	 */
@@ -212,10 +212,10 @@ class GWP_GV_Entry_Revisions {
 			return false;
 		}
 
-		// Find the fields that changed
+		// Find the fields that changed.
 		$changed_fields = $this->get_modified_entry_fields( $revision_to_add, $current_entry );
 
-		// Nothing changed
+		// Nothing changed.
 		if ( empty( $changed_fields ) ) {
 			return false;
 		}
@@ -237,7 +237,7 @@ class GWP_GV_Entry_Revisions {
 
 		gform_update_meta( $entry_or_entry_id, self::$meta_key, maybe_serialize( $revisions ) );
 
-		// Add note so we can display the record on the front end
+		// Add note so we can display the record on the front end.
 		$user_data = get_userdata( get_current_user_id() );
 		$note      = '';
 		foreach ( $changed_fields as $key => $old_value ) {
@@ -360,17 +360,17 @@ class GWP_GV_Entry_Revisions {
 	/**
 	 * Compares old entry array to new, return array of differences
 	 *
-	 * @param array<mixed> $old
-	 * @param array<mixed> $new
+	 * @param array<mixed> $old Old entry.
+	 * @param array<mixed> $new New entry.
 	 *
-	 * @return array<mixed> array of differences, with keys preserved
+	 * @return array<mixed> array of differences, with keys preserved.
 	 */
 	private function get_modified_entry_fields( $old = array(), $new = array() ) {
 
 		$return = $old;
 
 		foreach ( $old as $key => $old_value ) {
-			// Gravity Forms itself uses == comparison
+			// Gravity Forms itself uses == comparison.
 			if ( rgar( $new, $key ) == $old_value ) {
 				unset( $return[ $key ] );
 			}
@@ -380,13 +380,13 @@ class GWP_GV_Entry_Revisions {
 	}
 
 	/**
-	 * Get all revisions connected to an entry
+	 * Get all revisions connected to an entry.
 	 *
 	 * @since 1.0
 	 *
-	 * @param int $entry_id
+	 * @param int $entry_id Entry ID.
 	 *
-	 * @return array<mixed> Empty array if none found. Array if found
+	 * @return array<mixed> Empty array if none found. Array if found.
 	 */
 	public function get_revisions( $entry_id = 0 ) {
 
@@ -396,7 +396,7 @@ class GWP_GV_Entry_Revisions {
 		if ( $revisions ) {
 			$revisions = maybe_unserialize( $revisions );
 
-			// Single meta? Make it an array
+			// Single meta? Make it an array.
 			$return = isset( $revisions['id'] ) ? array( $revisions ) : $revisions;
 		}
 
@@ -412,7 +412,7 @@ class GWP_GV_Entry_Revisions {
 	 * @version v1.0.0
 	 * @access public
 	 *
-	 * @param int $entry_id
+	 * @param int $entry_id Entry ID.
 	 *
 	 * @return array<mixed> Empty array, if no revisions exist. Otherwise, last revision.
 	 */
@@ -450,8 +450,8 @@ class GWP_GV_Entry_Revisions {
 	 *
 	 * @since 1.0
 	 *
-	 * @param int $entry_id
-	 * @param int $revision_id Revision GMT timestamp
+	 * @param int $entry_id Entry ID.
+	 * @param int $revision_id Revision GMT timestamp.
 	 *
 	 * @return bool False if revision isn't found; true if gform_update_meta called.
 	 */
@@ -480,8 +480,8 @@ class GWP_GV_Entry_Revisions {
 	 *
 	 * @since 1.0
 	 *
-	 * @param int $entry_id
-	 * @param int $revision_id GMT timestamp of revision
+	 * @param int $entry_id Entry ID.
+	 * @param int $revision_id GMT timestamp of revision.
 	 *
 	 * @return array<mixed>|false Array if found, false if not.
 	 */
@@ -502,8 +502,8 @@ class GWP_GV_Entry_Revisions {
 	/**
 	 * Restores an entry to a specific revision, if the revision is found
 	 *
-	 * @param int $entry_id ID of entry
-	 * @param int $revision_id ID of revision (GMT timestamp)
+	 * @param int $entry_id ID of entry.
+	 * @param int $revision_id ID of revision (GMT timestamp).
 	 *
 	 * @return bool|WP_Error WP_Error if there was an error during restore. true if success; false if failure
 	 */
@@ -511,7 +511,7 @@ class GWP_GV_Entry_Revisions {
 
 		$revision = $this->get_revision( $entry_id, $revision_id );
 
-		// Revision has already been deleted or does not exist
+		// Revision has already been deleted or does not exist.
 		if ( empty( $revision ) ) {
 			return new WP_Error(
 				'not_found',
@@ -526,11 +526,11 @@ class GWP_GV_Entry_Revisions {
 		$current_entry = GFAPI::get_entry( $entry_id );
 
 		/**
-		 * @param bool $restore_entry_meta Whether to restore entry meta as well as field values. Default: false
+		 * @param bool $restore_entry_meta Whether to restore entry meta as well as field values. Default: false.
 		 */
 		if ( false === apply_filters( 'gv-entry-revisions/restore-entry-meta', false ) ) {
 
-			// Override revision details with current entry details
+			// Override revision details with current entry details.
 			foreach ( $current_entry as $key => $value ) {
 				if ( ! is_numeric( $key ) ) {
 					$revision[ $key ] = $value;
@@ -538,14 +538,14 @@ class GWP_GV_Entry_Revisions {
 			}
 		}
 
-		// Remove all hooks
+		// Remove all hooks.
 		remove_all_filters( 'gform_entry_pre_update' );
 		remove_all_filters( 'gform_form_pre_update_entry' );
 		remove_all_filters( sprintf( 'gform_form_pre_update_entry_%s', $revision['form_id'] ) );
 		remove_all_actions( 'gform_post_update_entry' );
 		remove_all_actions( sprintf( 'gform_post_update_entry_%s', $revision['form_id'] ) );
 
-		// Remove the entry key data
+		// Remove the entry key data.
 		unset( $revision[ self::$entry_key ] );
 
 		$updated_result = GFAPI::update_entry( $revision, $entry_id );
@@ -559,14 +559,14 @@ class GWP_GV_Entry_Revisions {
 
 		} else {
 
-			// Store the current entry as a revision, too, so you can revert
+			// Store the current entry as a revision, too, so you can revert.
 			// AJK: commented out for now as this call has the wrong arguments and will do nothin good.
-			// $this->add_revision( $entry_id, $current_entry );
+			// $this->add_revision( $entry_id, $current_entry );.
 
 			/**
-			 * Should the revision be removed after it has been restored? Default: false
+			 * Should the revision be removed after it has been restored? Default: false.
 			 *
-			 * @param bool $remove_after_restore [Default: false]
+			 * @param bool $remove_after_restore [Default: false].
 			 */
 			if ( apply_filters( 'gv-entry-revisions/delete-after-restore', false ) ) {
 				$this->delete_revision( $entry_id, $revision_id );
@@ -581,7 +581,7 @@ class GWP_GV_Entry_Revisions {
 	 *
 	 * @since 1.0
 	 *
-	 * @return void Redirects to single entry view after completion
+	 * @return void Redirects to single entry view after completion.
 	 */
 	public function restore() {
 
@@ -599,13 +599,13 @@ class GWP_GV_Entry_Revisions {
 			$nonce_action = $this->generate_restore_nonce_action( absint( $entry_id ), absint( $revision_id ) );
 			$valid        = wp_verify_nonce( $nonce, $nonce_action );
 
-			// Nonce didn't validate
+			// Nonce didn't validate.
 			if ( ! $valid ) {
 				GFCommon::log_error( 'Restoring the entry revision failed: nonce validation failed.' );
 				return;
 			}
 
-			// Handle restoring the entry
+			// Handle restoring the entry.
 			$this->restore_revision( absint( $entry_id ), absint( $revision_id ) );
 
 			wp_safe_redirect( remove_query_arg( 'restore' ) );
@@ -622,7 +622,7 @@ class GWP_GV_Entry_Revisions {
 	 * @param array<mixed> $entry The entry currently being viewed/edited.
 	 * @param array<mixed> $form The form object used to process the current entry.
 	 *
-	 * @return array<mixed> $meta_boxes, with the Versions box added
+	 * @return array<mixed> $meta_boxes, with the Versions box added.
 	 */
 	public function add_meta_box( $meta_boxes = array(), $entry = array(), $form = array() ) {
 
@@ -652,11 +652,11 @@ class GWP_GV_Entry_Revisions {
 	 *
 	 * @uses wp_text_diff()
 	 *
-	 * @param array<mixed> $previous Previous entry
-	 * @param array<mixed> $current Current entry
-	 * @param array<mixed> $form Entry form
+	 * @param array<mixed> $previous Previous entry.
+	 * @param array<mixed> $current Current entry.
+	 * @param array<mixed> $form Entry form.
 	 *
-	 * @return array<mixed> Array of diff output generated by wp_text_diff()
+	 * @return array<mixed> Array of diff output generated by wp_text_diff().
 	 */
 	private function get_diff( $previous = array(), $current = array(), $form = array() ) {
 
@@ -664,7 +664,7 @@ class GWP_GV_Entry_Revisions {
 
 		foreach ( $previous as $key => $previous_value ) {
 
-			// Don't compare `gv_revision` data
+			// Don't compare `gv_revision` data.
 			if ( self::$entry_key === $key ) {
 				continue;
 			}
@@ -795,7 +795,7 @@ class GWP_GV_Entry_Revisions {
 	/**
 	 * Returns nonce URL to restore a revision
 	 *
-	 * @param array<mixed> $revision Revision entry array
+	 * @param array<mixed> $revision Revision entry array.
 	 *
 	 * @return string
 	 */
@@ -829,9 +829,9 @@ class GWP_GV_Entry_Revisions {
 	 *
 	 * @see wp_post_revision_title() for inspiration
 	 *
-	 * @param array<mixed> $revision Revision entry array
-	 * @param bool         $link     Optional, default is true. Link to revision details page?
-	 * @param string       $format post revision title: 1: author avatar, 2: author name, 3: time ago, 4: date
+	 * @param array<mixed> $revision Revision entry array.
+	 * @param bool         $link     Optional, default is true. Link to revision details page?.
+	 * @param string       $format post revision title: 1: author avatar, 2: author name, 3: time ago, 4: date.
 	 *
 	 * @return string HTML of the revision version
 	 */
