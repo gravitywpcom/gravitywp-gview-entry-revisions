@@ -277,16 +277,16 @@ class GWP_GV_Entry_Revisions {
 			}
 			
 			if ( $old_value === '' ) {
-			$old_value = "[ " . __( 'empty', 'gravityview-entry-revisions' ) . " ]";
+			$old_value = "[ " . __( 'empty', 'gv-entry-revisions' ) . " ]";
 			}
 			
 			if ( $current_entry[$key] === '' ) {
-			$current_entry[$key] = "[ " . __( 'empty', 'gravityview-entry-revisions' ) . " ]";
+			$current_entry[$key] = "[ " . __( 'empty', 'gv-entry-revisions' ) . " ]";
 			}
 
 			$field_label = isset( $field->label ) ? $field->label : $key;
 	
-		    $note .= __( 'Field', 'gravityview-entry-revisions' ) . " " . $field_label . "\n" . '&nbsp;&nbsp;-- ' . __( 'From', 'gravityview-entry-revisions' ) . ": " . $old_value  . "\n" . '&nbsp;&nbsp;-- ' . __( 'To', 'gravityview-entry-revisions' ) . ": " . $current_entry[$key] . "\r\n" . "\n";
+		    $note .= __( 'Field', 'gv-entry-revisions' ) . " " . $field_label . "\n" . '&nbsp;&nbsp;-- ' . __( 'From', 'gv-entry-revisions' ) . ": " . $old_value  . "\n" . '&nbsp;&nbsp;-- ' . __( 'To', 'gv-entry-revisions' ) . ": " . $current_entry[$key] . "\r\n" . "\n";
         }
 		RGFormsModel::add_note( $entry_or_entry_id, get_current_user_id(), $user_data->display_name, $note );
 
@@ -450,7 +450,7 @@ class GWP_GV_Entry_Revisions {
 
 		// Revision has already been deleted or does not exist
 		if( empty( $revision ) ) {
-			return new WP_Error( 'not_found', __( 'Revision not found', 'gravityview-entry-revisions' ), array( 'entry_id' => $entry_id, 'revision_id' => $revision_id ) );
+			return new WP_Error( 'not_found', __( 'Revision not found', 'gv-entry-revisions' ), array( 'entry_id' => $entry_id, 'revision_id' => $revision_id ) );
 		}
 
 		$current_entry = GFAPI::get_entry( $entry_id );
@@ -610,9 +610,9 @@ class GWP_GV_Entry_Revisions {
 
 			$diff = wp_text_diff( $previous_value, $current_value, array(
 				'show_split_view' => true,
-				'title' => sprintf( esc_html__( '%s (Field %s)', 'gravityview-entry-revisions' ), $label, $key ),
-				'title_left' => esc_html__( 'Entry Revision', 'gravityview-entry-revisions' ),
-				'title_right' => esc_html__( 'Current Entry', 'gravityview-entry-revisions' ),
+				'title' => sprintf( esc_html__( '%s (Field %s)', 'gv-entry-revisions' ), $label, $key ),
+				'title_left' => esc_html__( 'Entry Revision', 'gv-entry-revisions' ),
+				'title_right' => esc_html__( 'Current Entry', 'gv-entry-revisions' ),
 			) );
 
 			/**
@@ -654,8 +654,8 @@ class GWP_GV_Entry_Revisions {
 		$diffs = $this->get_diff( $revision, $entry, $form );
 
 		if ( empty( $diffs ) ) {
-			echo '<h3>' . esc_html__( 'This revision is identical to the current entry.', 'gravityview-entry-revisions' ) . '</h3>';
-			?><a href="<?php echo esc_url( remove_query_arg( 'revision' ) ); ?>" class="button button-primary button-large"><?php esc_html_e( 'Return to Entry' ); ?></a><?php
+			echo '<h3>' . esc_html__( 'This revision is identical to the current entry.', 'gv-entry-revisions' ) . '</h3>';
+			?><a href="<?php echo esc_url( remove_query_arg( 'revision' ) ); ?>" class="button button-primary button-large"><?php esc_html_e( 'Return to Entry', 'gv-entry-revisions' ); ?></a><?php
 			return;
 		}
 
@@ -695,8 +695,8 @@ class GWP_GV_Entry_Revisions {
 		<hr />
 
 		<p class="wp-clearfix">
-			<a href="<?php echo $this->get_restore_url( $revision ); ?>" class="button button-primary button-hero alignleft" onclick="return confirm('<?php esc_attr_e( 'Are you sure? The Current Entry data will be replaced with the Entry Revision data shown.' ) ?>');"><?php esc_html_e( 'Restore This Entry Revision' ); ?></a>
-			<a href="<?php echo esc_url( remove_query_arg( 'revision' ) ); ?>" class="button button-secondary button-hero alignright"><?php esc_html_e( 'Cancel: Keep Current Entry' ); ?></a>
+			<a href="<?php echo $this->get_restore_url( $revision ); ?>" class="button button-primary button-hero alignleft" onclick="return confirm('<?php esc_attr_e( 'Are you sure? The Current Entry data will be replaced with the Entry Revision data shown.', 'gv-entry-revisions' ) ?>');"><?php esc_html_e( 'Restore This Entry Revision', 'gv-entry-revisions' ); ?></a>
+			<a href="<?php echo esc_url( remove_query_arg( 'revision' ) ); ?>" class="button button-secondary button-hero alignright"><?php esc_html_e( 'Cancel: Keep Current Entry', 'gv-entry-revisions' ); ?></a>
 		</p>
 	<?php
 	}
@@ -809,7 +809,7 @@ class GWP_GV_Entry_Revisions {
 		$revisions = $this->get_revisions( $entry_id );
 
 		if( empty( $revisions ) ) {
-			echo wpautop( esc_html__( 'This entry has no revisions.', 'gravityview-entry-revisions' ) );
+			echo wpautop( esc_html__( 'This entry has no revisions.', 'gv-entry-revisions' ) );
 			return;
 		}
 
@@ -823,7 +823,7 @@ class GWP_GV_Entry_Revisions {
 			}
 		}
 
-		echo "<div class='hide-if-js'><p>" . __( 'JavaScript must be enabled to use this feature.', 'gravityview-entry-revisions' ) . "</p></div>\n";
+		echo "<div class='hide-if-js'><p>" . __( 'JavaScript must be enabled to use this feature.', 'gv-entry-revisions' ) . "</p></div>\n";
 
 		echo "<ul class='post-revisions hide-if-no-js'>\n";
 		echo $rows;
@@ -845,7 +845,7 @@ add_action('plugins_loaded', 'gv_entry_revisions_load_textdomain');
 	 * @return void
 	 */
 	function gv_entry_revisions_load_textdomain() {
-		load_plugin_textdomain( 'gravityview-entry-revisions', false, dirname( plugin_basename(__FILE__) ) . '/languages' );
+		load_plugin_textdomain( 'gv-entry-revisions', false, dirname( plugin_basename(__FILE__) ) . '/languages' );
 }
 
 /**
