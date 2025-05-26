@@ -151,9 +151,12 @@ class GWP_GV_Entry_Revisions {
 	 */
 	public function aiwos_update_changelog_on_workflow_step_other_form( $entry, $original_entry ) {
 
+		$form = array();
 		$form = RGFormsModel::get_form_meta( $entry['form_id'] );
 
-		if ( ! empty( $form ) && is_object( $form ) ) {
+		if ( count( $form ) > 0 ) {
+			$triggered_by_form_id = isset( $_GET['id'] ) ? sanitize_key( wp_unslash( $_GET['id'] ) ) : '';
+			$form['note_title'] = __( 'Update Entry by form #', 'gv-entry-revisions' ) . $triggered_by_form_id;
 			$this->save( $form, $entry['id'], $original_entry );
 		}
 		return $entry;
@@ -175,9 +178,11 @@ class GWP_GV_Entry_Revisions {
 	 */
 	public function aiwos_update_changelog_on_inline_edit( $update_result, $entry, $form_id, $gf_field, $original_entry ) {
 
+		$form = array();
 		$form = RGFormsModel::get_form_meta( $entry['form_id'] );
 
-		if ( ! empty( $form ) && is_object( $form ) ) {
+		if ( count( $form ) > 0 ) {
+			$form['note_title'] = __( 'Inline Edit', 'gv-entry-revisions' );
 			$this->save( $form, $entry['id'], $original_entry );
 		}
 
@@ -336,10 +341,17 @@ class GWP_GV_Entry_Revisions {
 			}
 
 			$field_label = isset( $field->label ) ? $field->label : $key;
+			if ( isset( $form['note_title'] ) ) {
+				$user_id    = 0;
+				$note_title = $form['note_title'];
+			} else {
+				$user_id    = get_current_user_id();
+				$note_title = $user_data->display_name;
+			}
 
 			$note .= __( 'Field', 'gv-entry-revisions' ) . ' ' . $field_label . "\n" . '&nbsp;&nbsp;-- ' . __( 'From', 'gv-entry-revisions' ) . ': ' . $old_value . "\n" . '&nbsp;&nbsp;-- ' . __( 'To', 'gv-entry-revisions' ) . ': ' . $current_entry[ $key ] . "\r\n" . "\n";
 		}
-		RGFormsModel::add_note( $entry_or_entry_id, get_current_user_id(), $user_data->display_name, $note );
+		RGFormsModel::add_note( $entry_or_entry_id, $user_id, $note_title, $note );
 
 		return true;
 	}
