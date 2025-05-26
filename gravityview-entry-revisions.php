@@ -783,8 +783,8 @@ class GWP_GV_Entry_Revisions {
 	 *
 	 * @since 1.0
 	 *
-	 * @param int $entry_id
-	 * @param int $revision_date_gmt
+	 * @param int $entry_id Entry ID.
+	 * @param int $revision_date_gmt Date Time GMT.
 	 *
 	 * @return string
 	 */
@@ -814,7 +814,7 @@ class GWP_GV_Entry_Revisions {
 	 * @version v1.0.0
 	 * @access private
 	 *
-	 * @param array<mixed> $revision Default: array()
+	 * @param array<mixed> $revision Default: array().
 	 *
 	 * @return mixed
 	 */
@@ -868,7 +868,7 @@ class GWP_GV_Entry_Revisions {
 	 *
 	 * @since 1.0
 	 *
-	 * @param array<mixed> $data Array of data with entry, form, mode keys
+	 * @param array<mixed> $data Array of data with entry, form, mode keys.
 	 *
 	 * @return void
 	 */
@@ -894,7 +894,7 @@ class GWP_GV_Entry_Revisions {
 		foreach ( $revisions as $revision ) {
 			$diffs = $this->get_diff( $revision, $entry, $form );
 
-			// Only show if there are differences
+			// Only show if there are differences.
 			if ( ! empty( $diffs ) ) {
 				$rows .= "\t<li>" . $this->revision_title( $revision ) . "</li>\n";
 			}
@@ -910,7 +910,7 @@ class GWP_GV_Entry_Revisions {
 
 add_action( 'gform_loaded', array( 'GWP_GV_Entry_Revisions', 'load' ) );
 
-// Translation files of the plugin
+// Translation files of the plugin.
 add_action( 'plugins_loaded', 'gv_entry_revisions_load_textdomain' );
 	/**
 	 * Function: gv_entry_revisions_load_textdomain.
