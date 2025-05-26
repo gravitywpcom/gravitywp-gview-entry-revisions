@@ -349,7 +349,7 @@ class GWP_GV_Entry_Revisions {
 				$note_title = $user_data->display_name;
 			}
 
-			$note .= __( 'Field', 'gv-entry-revisions' ) . ' ' . $field_label . "\n" . '&nbsp;&nbsp;-- ' . __( 'From', 'gv-entry-revisions' ) . ': ' . $old_value . "\n" . '&nbsp;&nbsp;-- ' . __( 'To', 'gv-entry-revisions' ) . ': ' . $current_entry[ $key ] . "\r\n" . "\n";
+			$note .= __( 'Field', 'gv-entry-revisions' ) . ' ' . $field_label . "\n" . '&nbsp;&nbsp;-- ' . __( 'From', 'gv-entry-revisions' ) . ': ' . $old_value . "\n" . '&nbsp;&nbsp;-- ' . __( 'To', 'gv-entry-revisions' ) . ': ' . $current_entry[ $key ] . "\r\n\n";
 		}
 		RGFormsModel::add_note( $entry_or_entry_id, $user_id, $note_title, $note );
 
