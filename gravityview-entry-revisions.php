@@ -340,6 +340,7 @@ class GWP_GV_Entry_Revisions {
 				$current_entry[ $key ] = '[ ' . __( 'empty', 'gv-entry-revisions' ) . ' ]';
 			}
 
+			// Change default note title when change is triggered by Edit Entry of another form.
 			$field_label = isset( $field->label ) ? $field->label : $key;
 			if ( isset( $form['note_title'] ) ) {
 				$user_id    = 0;

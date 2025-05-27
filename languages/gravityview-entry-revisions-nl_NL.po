@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GravityView - Gravity Forms Entry Revisions\n"
-"POT-Creation-Date: 2025-05-26 12:53-0400\n"
-"PO-Revision-Date: 2025-05-26 13:00-0400\n"
+"POT-Creation-Date: 2025-05-27 09:13-0400\n"
+"PO-Revision-Date: 2025-05-27 09:13-0400\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: nl_NL\n"
@@ -21,51 +21,56 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: *.js\n"
 
-#: gravityview-entry-revisions.php:280 gravityview-entry-revisions.php:284
+#: gravityview-entry-revisions.php:159
+msgid "Update Entry by form #"
+msgstr "Inzending Bijwerken van form #"
+
+#: gravityview-entry-revisions.php:185
+msgid "Inline Edit"
+msgstr ""
+
+#: gravityview-entry-revisions.php:336 gravityview-entry-revisions.php:340
 msgid "empty"
 msgstr "leeg"
 
-#: gravityview-entry-revisions.php:289 gravityview-entry-revisions.php:874
-#: gravityview-entry-revisions.php:917
+#: gravityview-entry-revisions.php:353
 msgid "Field"
 msgstr "Veld"
 
-#: gravityview-entry-revisions.php:289 gravityview-entry-revisions.php:874
-#: gravityview-entry-revisions.php:917
+#: gravityview-entry-revisions.php:353
 msgid "From"
 msgstr "Van"
 
-#: gravityview-entry-revisions.php:289 gravityview-entry-revisions.php:874
-#: gravityview-entry-revisions.php:917
+#: gravityview-entry-revisions.php:353
 msgid "To"
 msgstr "Naar"
 
-#: gravityview-entry-revisions.php:453
+#: gravityview-entry-revisions.php:519
 msgid "Revision not found"
 msgstr "Revisie niet gevonden."
 
-#: gravityview-entry-revisions.php:613
+#: gravityview-entry-revisions.php:688
 #, php-format
-msgid "%s (Field %s)"
+msgid "%1$s (Field %2$s)"
 msgstr ""
 
-#: gravityview-entry-revisions.php:614
+#: gravityview-entry-revisions.php:689
 msgid "Entry Revision"
 msgstr "Entry Revisie"
 
-#: gravityview-entry-revisions.php:615
+#: gravityview-entry-revisions.php:690
 msgid "Current Entry"
 msgstr "Huidige inzending"
 
-#: gravityview-entry-revisions.php:657
+#: gravityview-entry-revisions.php:734
 msgid "This revision is identical to the current entry."
 msgstr "Deze revisie is hetzelfde als de huidige inzending. "
 
-#: gravityview-entry-revisions.php:658
+#: gravityview-entry-revisions.php:735
 msgid "Return to Entry"
 msgstr "Terug naar inzending"
 
-#: gravityview-entry-revisions.php:698
+#: gravityview-entry-revisions.php:776
 msgid ""
 "Are you sure? The Current Entry data will be replaced with the Entry "
 "Revision data shown."
@@ -73,31 +78,27 @@ msgstr ""
 "Weet u het zeker? De huidige inzendingsdata zal vervangen worden met de "
 "getoonde Entry Revision data."
 
-#: gravityview-entry-revisions.php:698
+#: gravityview-entry-revisions.php:776
 msgid "Restore This Entry Revision"
 msgstr "Herstel deze Entry Revisie"
 
-#: gravityview-entry-revisions.php:699
+#: gravityview-entry-revisions.php:777
 msgid "Cancel: Keep Current Entry"
 msgstr "Annuleren: Behoud Huidige Inzending"
 
 #. translators: revision date format, see http://php.net/date
-#: gravityview-entry-revisions.php:769
+#: gravityview-entry-revisions.php:847
 msgctxt "revision date format"
 msgid "F j, Y @ H:i:s"
 msgstr ""
 
-#: gravityview-entry-revisions.php:812
+#: gravityview-entry-revisions.php:890
 msgid "This entry has no revisions."
 msgstr "Deze inzending heft geen wijzigingen. "
 
-#: gravityview-entry-revisions.php:826
+#: gravityview-entry-revisions.php:904
 msgid "JavaScript must be enabled to use this feature."
 msgstr "JavaScript moet ingeschakeld zijn voor deze functie."
-
-#: gravityview-entry-revisions.php:910
-msgid "Workflow step"
-msgstr "Workflow stap"
 
 #. Plugin Name of the plugin/theme
 msgid "GravityView - Gravity Forms Entry Revisions"
@@ -122,6 +123,9 @@ msgstr ""
 #. Author URI of the plugin/theme
 msgid "https://gravityview.co"
 msgstr ""
+
+#~ msgid "Workflow step"
+#~ msgstr "Workflow stap"
 
 #~ msgid "changed from"
 #~ msgstr "is veranderd van"
