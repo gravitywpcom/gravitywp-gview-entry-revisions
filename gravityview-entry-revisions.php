@@ -154,7 +154,7 @@ class GWP_GV_Entry_Revisions {
 		$form = array();
 		$form = RGFormsModel::get_form_meta( $entry['form_id'] );
 
-		if ( count( $form ) > 0 ) {
+		if ( ! is_null( $form ) || is_array( $form ) ) {
 			$triggered_by_form_id = isset( $_GET['id'] ) ? sanitize_key( wp_unslash( $_GET['id'] ) ) : '';
 			$form['note_title']   = __( 'Update Entry by form #', 'gv-entry-revisions' ) . $triggered_by_form_id;
 			$this->save( $form, $entry['id'], $original_entry );
@@ -181,7 +181,7 @@ class GWP_GV_Entry_Revisions {
 		$form = array();
 		$form = RGFormsModel::get_form_meta( $entry['form_id'] );
 
-		if ( count( $form ) > 0 ) {
+		if ( ! is_null( $form ) || is_array( $form ) ) {
 			$form['note_title'] = __( 'Inline Edit', 'gv-entry-revisions' );
 			$this->save( $form, $entry['id'], $original_entry );
 		}
