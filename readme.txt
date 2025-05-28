@@ -1,7 +1,7 @@
 === Entry Revisions by GravityView ===
 Tags: gravityview, gravity forms
 Requires at least: 4.0
-Tested up to: 6.2
+Tested up to: 6.8.1
 Stable tag: trunk
 Contributors: gravityview
 License: GPL 3 or higher
@@ -16,6 +16,11 @@ Track changes to Gravity Forms entries and restore from previous revisions. Requ
 4. You'll see a "Revisions" meta box on the entries page. Click the link next to the revision to compare versions, and restore.
 
 == Changelog ==
+= 1.2.1 = 
+- Improved readability changelog.
+- Update changelog after Inline Edit.
+- Update changelog after entry is updated by workflow from another form.
+
 = 1.2 =
 - Renamed the main class to avoid issues with other plugins.
 
