@@ -18,6 +18,8 @@ Track changes to Gravity Forms entries and restore from previous revisions. Requ
 == Changelog ==
 = 1.2.1 = 
 - Improved readability changelog.
+- Update changelog after Inline Edit.
+- Update changelog after entry is updated by workflow from another form.
 
 = 1.2 =
 - Renamed the main class to avoid issues with other plugins.
