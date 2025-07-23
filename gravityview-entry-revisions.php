@@ -83,6 +83,8 @@ class GWP_GV_Entry_Revisions {
 		// Save entry revision on the front end and back end.
 		add_action( 'gform_after_update_entry', array( $this, 'save' ), 10, 3 );
 
+		add_filter( 'gravityflow_timeline_note_add', array( $this, 'disable_gflow_form_conenctor_update_field_values_note' ), 100, 5 );
+
 		// We only run on the entry detail page.
 		if ( 'entry_detail' !== GFForms::get_page() ) {
 			return;
@@ -155,10 +157,31 @@ class GWP_GV_Entry_Revisions {
 		$form = RGFormsModel::get_form_meta( $entry['form_id'] );
 
 		if ( ! is_null( $form ) || is_array( $form ) ) {
-			$form['note_title']   = __( 'Entry updated by workflow', 'gv-entry-revisions' );
+			$form['note_title'] = __( 'Entry updated by workflow', 'gv-entry-revisions' );
 			$this->save( $form, $entry['id'], $original_entry );
 		}
 		return $entry;
+	}
+
+	/**
+	 * Disables the Gravity Flow "Update Field Values" step note.
+	 *
+	 * This method checks if the current Gravity Flow step type is 'update_field_values'.
+	 * If so, it sets the note to false, effectively preventing the note from being added.
+	 *
+	 * @param mixed  $note      The note to be added.
+	 * @param int    $entry_id  The ID of the entry being processed.
+	 * @param int    $user_id   The ID of the user performing the action.
+	 * @param string $user_name The name of the user performing the action.
+	 * @param object $step      The Gravity Flow step object.
+	 *
+	 * @return mixed The modified note value (false if step type is 'update_field_values').
+	 */
+	public function disable_gflow_form_conenctor_update_field_values_note( $note, $entry_id, $user_id, $user_name, $step ) {
+		if ( $step->_step_type === 'update_field_values' ) {
+			$note = false;
+		}
+			return $note;
 	}
 
 	/**
