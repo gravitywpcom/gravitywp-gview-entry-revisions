@@ -83,7 +83,7 @@ class GWP_GV_Entry_Revisions {
 		// Save entry revision on the front end and back end.
 		add_action( 'gform_after_update_entry', array( $this, 'save' ), 10, 3 );
 		// Prevent adding default form conenctor note.
-		add_filter( 'gravityflow_timeline_note_add', array( $this, 'disable_gflow_form_conenctor_update_field_values_note' ), 100, 5 );
+		add_filter( 'gravityflow_timeline_note_add', array( $this, 'disable_gflow_form_connector_note' ), 10, 5 );
 
 		// We only run on the entry detail page.
 		if ( 'entry_detail' !== GFForms::get_page() ) {
@@ -176,7 +176,7 @@ class GWP_GV_Entry_Revisions {
 	 *
 	 * @return mixed The modified note value (false if step type is 'update_field_values').
 	 */
-	public function disable_gflow_form_conenctor_update_field_values_note( $note, $entry_id, $user_id, $user_name, $step ) {
+	public function disable_gflow_form_connector_note( $note, $entry_id, $user_id, $user_name, $step ) {
 		if ( $step->_step_type === 'update_field_values' ) {
 			$note = false;
 		}
