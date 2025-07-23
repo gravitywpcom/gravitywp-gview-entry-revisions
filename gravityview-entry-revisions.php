@@ -82,7 +82,7 @@ class GWP_GV_Entry_Revisions {
 		add_filter( 'gravityview-inline-edit/entry-updated', array( $this, 'aiwos_update_changelog_on_inline_edit' ), 10, 5 );
 		// Save entry revision on the front end and back end.
 		add_action( 'gform_after_update_entry', array( $this, 'save' ), 10, 3 );
-
+		// Prevent adding default form conenctor note.
 		add_filter( 'gravityflow_timeline_note_add', array( $this, 'disable_gflow_form_conenctor_update_field_values_note' ), 100, 5 );
 
 		// We only run on the entry detail page.
