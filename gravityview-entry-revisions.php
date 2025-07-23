@@ -166,8 +166,7 @@ class GWP_GV_Entry_Revisions {
 	/**
 	 * Disables the Gravity Flow "Update Field Values" step note.
 	 *
-	 * This method checks if the current Gravity Flow step type is 'update_field_values'.
-	 * If so, it sets the note to false, effectively preventing the note from being added.
+	 * Prevent adding default "update_field_values' note.
 	 *
 	 * @param mixed  $note      The note to be added.
 	 * @param int    $entry_id  The ID of the entry being processed.
