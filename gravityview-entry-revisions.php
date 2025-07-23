@@ -155,8 +155,7 @@ class GWP_GV_Entry_Revisions {
 		$form = RGFormsModel::get_form_meta( $entry['form_id'] );
 
 		if ( ! is_null( $form ) || is_array( $form ) ) {
-			$triggered_by_form_id = isset( $_GET['id'] ) ? sanitize_key( wp_unslash( $_GET['id'] ) ) : '';
-			$form['note_title']   = __( 'Update Entry by form #', 'gv-entry-revisions' ) . $triggered_by_form_id;
+			$form['note_title']   = __( 'Entry updated by workflow', 'gv-entry-revisions' );
 			$this->save( $form, $entry['id'], $original_entry );
 		}
 		return $entry;
